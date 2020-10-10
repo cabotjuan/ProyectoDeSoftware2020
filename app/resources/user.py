@@ -1,6 +1,6 @@
 from flask import redirect, render_template, request, url_for, session, abort
 from app.db import connection
-from app.models.user import User
+from app.models.users import User
 from app.helpers.auth import authenticated
 
 # Protected resources

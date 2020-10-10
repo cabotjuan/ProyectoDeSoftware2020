@@ -9,6 +9,7 @@ class BaseConfig(object):
     DB_PASS = "db_pass"
     DB_NAME = "db_name"
     SECRET_KEY = "secret"
+    SQLALCHEMY_DATABASE_URI = "db_uri"
 
     @staticmethod
     def configure(app):
@@ -25,8 +26,8 @@ class DevelopmentConfig(BaseConfig):
     DB_USER = environ.get("DB_USER", "root")
     DB_PASS = environ.get("DB_PASS", "")
     DB_NAME = environ.get("DB_NAME", "grupo5")
-
-
+    SQLALCHEMY_ECHO = True
+  
 class TestingConfig(BaseConfig):
     """Testing configuration."""
 
@@ -37,7 +38,7 @@ class TestingConfig(BaseConfig):
     DB_USER = environ.get("DB_USER", "MY_DB_USER")
     DB_PASS = environ.get("DB_PASS", "MY_DB_PASS")
     DB_NAME = environ.get("DB_NAME", "MY_DB_NAME")
-
+   
 
 class ProductionConfig(BaseConfig):
     """Production configuration."""

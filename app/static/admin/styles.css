@@ -1,48 +1,47 @@
 /*      FONTS      */
 
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;500;700&display=swap');
-body{
+body {
     font-family: 'Josefin Sans', sans-serif;
 }
+
 /*      COLORES      */
 
-.bg-color-1{
+.bg-color-1 {
     background-color: #2f9bae;
 }
-.bg-color-2{
+
+.bg-color-2 {
     background-color: #fafafa;
 }
 
-
 /*      HEADER STYLES      */
 
-.nav-link{
+.nav-link {
     color: #fafafa;
 }
-.username{
+
+.username {
     color: #fafafa;
     font-style: normal;
     text-align: center;
     vertical-align: super;
 }
-.username-toggler:hover{
+
+.username-toggler:hover {
     background-color: #4dbace;
 }
 
-
 /*      CONTENT STYLES      */
 
-a.stretched-link,
-a.stretched-link:hover {
+a.stretched-link, a.stretched-link:hover {
     color: inherit!important;
     text-decoration: none!important;
 }
 
-div.card:hover{
+div.card:hover {
     background-color: #4dbace;
-    box-shadow:  0px 0px 5px #797979;
+    box-shadow: 0px 0px 5px #797979;
 }
 
 /*      FOOTER STYLES      */
-
-

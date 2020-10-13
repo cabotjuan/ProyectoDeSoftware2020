@@ -1,0 +1,21 @@
+{% extends "admin/layout.html" %}
+{% block title %}Centros Ayuda GBA - Administracion - Usuarios{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block navbar %}
+
+{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
+        <li class="breadcrumb-item active" aria-current="Usuarios">Usuarios</li>
+    </ol>
+</nav>
+
+<div class="container-fluid">
+    MODULO USUARIOS...
+</div>
+
+{% endblock %}

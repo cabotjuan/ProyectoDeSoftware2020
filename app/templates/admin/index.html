@@ -1,0 +1,39 @@
+{% extends "admin/layout.html" %}
+{% block title %}Centros Ayuda GBA - Administracion{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block navbar %}
+
+{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">Library</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Data</li>
+    </ol>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md mb-1 d-flex justify-content-center">
+            <div class="card text-center text-white w-50 bg-color-1" href="#">
+                <img src="../../static/img/Users.png" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title"><a href="#" class="stretched-link">Usuarios</a></h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md mb-1 d-flex justify-content-center">
+            <div class="card text-center text-white w-50 bg-color-1">
+                <img src="../../static/img/Settings.png" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title"><a href="#" class="stretched-link">Configuración</a></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

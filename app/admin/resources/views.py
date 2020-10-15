@@ -30,8 +30,7 @@ def register():
             username=form.username.data,
             first_name=form.first_name.data,
             last_name=form.last_name.data,
-            password=form.password.data,
-            role_id=1)
+            password=form.password.data)
         # agrega nuevo user a la db.
         db.session.add(user)
         db.session.commit()
@@ -78,8 +77,18 @@ def usuarios():
     """
        Vista de modulo CRUD usuarios en administracion.
     """
-    #IMPLEMENTAR...
-    return render_template('admin/usuarios.html')
+    users = User.all()
+    return render_template('admin/usuarios.html', users=users)
+
+@admin_bp.route('/usuariosPorNombre')
+@login_required
+def usuariosPorNombre():
+    """
+       Vista de modulo CRUD usuarios en administracion.
+    """
+    #Modificar para recibir el primer nombre a buscar
+    users = User.get_by_name('admin')
+    return render_template('admin/usuarios.html', users=users)
 
 @admin_bp.route('/configuracion')
 @login_required

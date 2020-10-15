@@ -17,6 +17,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(60), index=True, unique=True)
     first_name = db.Column(db.String(60), index=True)
     last_name = db.Column(db.String(60), index=True)
+#    active = db.Column(db.Boolean, default=True)
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     
@@ -42,6 +43,34 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return '<user: {}>'.format(self.username)
+
+    @staticmethod
+    def get_by_name(first_name):
+        """
+        Devuelve una lista de usuarios con first_name igual al parametro
+        """
+        return User.query.filter_by(first_name=first_name)
+
+    @staticmethod
+    def get_by_active():
+        """
+        Devuelve una lista de los usuarios activos
+        """
+        return User.query.filter_by(active=True)
+
+    @staticmethod
+    def get_by_blocked():
+        """
+        Devuelve una lista de los usuarios bloqueados
+        """
+        return User.query.filter_by(active=False)
+
+    @staticmethod
+    def all():
+        """
+        Devuelve todos los usuarios del sistema
+        """
+        return User.query.all()
 
 
 # Set up user_loader

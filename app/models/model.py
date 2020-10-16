@@ -97,6 +97,4 @@ class Config(db.Model):
     email = db.Column(db.String(60))
     n_elements = db.Column(db.Integer)
     site_enabled = db.Column(db.Boolean)
-
-    def __repr__(self):
-        return '<Config: {}>'.format(self.action)
+    

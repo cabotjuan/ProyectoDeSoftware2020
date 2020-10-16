@@ -1,7 +1,7 @@
 from flask import flash, redirect, render_template, url_for, Blueprint
-from app.models.model import User
+from app.models.model import User, Config
 from app.extensions import db
-from app.admin.resources.forms import LoginForm, RegistrationForm
+from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm
 from flask_login import login_required, login_user, logout_user
 
 # Blueprint Administracion
@@ -81,11 +81,22 @@ def usuarios():
     #IMPLEMENTAR...
     return render_template('admin/usuarios.html')
 
-@admin_bp.route('/configuracion')
+@admin_bp.route('/configuracion', methods=['GET', 'POST'])
 @login_required
 def configuracion():
     """
       Vista de configuracion de sistema en administracion.
     """
-    #IMPLEMENTAR...
-    return render_template('admin/configuracion.html')
+    
+
+    # Trae la informacion ya cargada para mostrarla en el formulario cuando method=GET
+    config = Config.query.first()
+    form = ConfigForm(obj=config)
+
+    # Guarda la informacion cargada desde el template cuando method=POST
+    if form.validate_on_submit():
+       form.populate_obj(config) 
+       db.session.commit()
+       
+    # Carga login template
+    return render_template('admin/configuracion.html', form=form, title='Centros de Ayuda GBA - Configuración')

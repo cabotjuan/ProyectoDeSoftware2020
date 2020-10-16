@@ -2,13 +2,14 @@
 
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, SubmitField, ValidationError
-from wtforms.validators import DataRequired, Email, EqualTo
+from wtforms import TextAreaField, IntegerField, BooleanField, RadioField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
 from app.models.model import User
 
 
 class RegistrationForm(FlaskForm):
     """
-    Form for users to create new account
+    Formulario para crear una nueva cuenta de Admin
     """
     email = StringField('Email', validators=[DataRequired(), Email()])
     username = StringField('Username', validators=[DataRequired()])
@@ -18,6 +19,9 @@ class RegistrationForm(FlaskForm):
         DataRequired(),
         EqualTo('confirm_password')
     ])
+    active = BooleanField('Active', render_kw={'checked': True})
+    admin = BooleanField('Admin Role')
+    operator = BooleanField('Operator Role')
     confirm_password = PasswordField('Confirm Password')
     submit = SubmitField('Register')
 
@@ -32,8 +36,19 @@ class RegistrationForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     """
-    Form for users to login
+    Formulario para autenticarse
     """
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
+    password = PasswordField('Contraseña', validators=[DataRequired()])
+    submit = SubmitField('Iniciar sesión')
+
+class ConfigForm (FlaskForm):
+    """
+    Formulario para configurar informacion de pagina
+    """
+    title = StringField('Título', validators=[DataRequired(), Length(max=40)])
+    description = TextAreaField('Descripción', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    n_elements = IntegerField('Numero de elementos', validators=[DataRequired(), NumberRange(min=0)])
+    site_enabled = RadioField('Sitio público habilitado', coerce=int, choices=[(1,'Habilitado'),(0,'Deshabilitado')])
+    submit = SubmitField('Guardar cambios')

@@ -15,7 +15,9 @@
 </nav>
 
 <div class="container-fluid">
-
+  {% for user in users %}
+  <li>{{ user.email }} - {{ user.first_name }} - {{ user.last_name }}</li>
+  {% endfor %}
 </div>
 
 {% endblock %}

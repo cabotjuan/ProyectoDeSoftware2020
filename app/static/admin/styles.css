@@ -34,6 +34,13 @@ body {
 
 /*      CONTENT STYLES      */
 
+.form-login {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: auto;
+}
+
 a.stretched-link, a.stretched-link:hover {
     color: inherit!important;
     text-decoration: none!important;

@@ -4,6 +4,9 @@ from app.extensions import db
 from app.extensions import login_manager
 
 
+users_roles = db.Table('users_roles', db.Column('role_id', db.Integer, db.ForeignKey(
+    'roles.id'), primary_key=True), db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True))
+
 class User(UserMixin, db.Model):
     """
     Creacion de tabla users.
@@ -18,8 +21,8 @@ class User(UserMixin, db.Model):
     first_name = db.Column(db.String(60), index=True)
     last_name = db.Column(db.String(60), index=True)
     password_hash = db.Column(db.String(128))
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    
+    roles = db.relationship('Role', secondary=users_roles,
+                            back_populates='users', lazy='dynamic')
     @property
     def password(self):
         """
@@ -51,6 +54,8 @@ def load_user(user_id):
 
 permissions_roles = db.Table('permissions_roles', db.Column('role_id', db.Integer, db.ForeignKey('roles.id'), primary_key=True), db.Column('permission_id', db.Integer, db.ForeignKey('permissions.id'), primary_key=True))
 
+
+
 class Role(db.Model):
     """
     Creacion de tabla Roles
@@ -62,7 +67,8 @@ class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(60), unique=True)
     description = db.Column(db.String(200))
-    users = db.relationship('User', backref='role',lazy='dynamic')
+    users = db.relationship(
+        'User', secondary=users_roles, back_populates='roles', lazy='dynamic')
     permissions = db.relationship('Permission', secondary=permissions_roles, back_populates='roles',lazy='dynamic')
 
     def __repr__(self):
@@ -99,4 +105,4 @@ class Config(db.Model):
     site_enabled = db.Column(db.Boolean)
 
     def __repr__(self):
-        return '<Config: {}>'.format(self.action)
+        return '<Config: {}>'.format(self.id)

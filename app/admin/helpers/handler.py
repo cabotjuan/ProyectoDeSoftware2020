@@ -8,7 +8,6 @@ def not_found_error(e):
     }
     return render_template("error.html", **kwargs), 404
 
-
 def unauthorized_error(e):
     kwargs = {
         "error_name": "401 Unauthorized Error",

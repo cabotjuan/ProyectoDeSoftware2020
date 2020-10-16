@@ -1,7 +1,7 @@
 # app/auth/forms.py
 
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, SubmitField, ValidationError
+from wtforms import PasswordField, StringField, SubmitField, ValidationError, BooleanField
 from wtforms.validators import DataRequired, Email, EqualTo
 from app.models.model import User
 
@@ -18,6 +18,9 @@ class RegistrationForm(FlaskForm):
         DataRequired(),
         EqualTo('confirm_password')
     ])
+    active = BooleanField('Active', render_kw={'checked': True})
+    admin = BooleanField('Admin Role')
+    operator = BooleanField('Operator Role')
     confirm_password = PasswordField('Confirm Password')
     submit = SubmitField('Register')
 

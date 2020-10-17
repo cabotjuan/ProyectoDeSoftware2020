@@ -21,6 +21,11 @@ body {
     color: #fafafa;
 }
 
+.nav-link:hover {
+    color: #fafafa!important;
+    font-weight: bold;
+}
+
 .username {
     color: #fafafa;
     font-style: normal;
@@ -33,6 +38,10 @@ body {
 }
 
 /*      CONTENT STYLES      */
+
+.main-content {
+    min-height: 100vh;
+}
 
 .form-login {
     width: 100%;
@@ -51,4 +60,19 @@ div.card:hover {
     box-shadow: 0px 0px 5px #797979;
 }
 
+thead {
+    background: #2f9bae;
+    color: #fafafa;
+}
+
 /*      FOOTER STYLES      */
+
+footer {
+    height: 2rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #b6b6b7;
+    color: #fafafa;
+}

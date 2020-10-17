@@ -101,8 +101,11 @@ def listar_usuarios():
         users = User.query.all()
         return render_template('admin/usuarios.html', users=users)
     else:
-        flash('No tienes permisos para realizar esa acción.')
-        return render_template(url_for('admin.index'))
+        flash('No tienes permisos para realizar esa acción.', 'piola')
+        # danger ROJO
+        # warning NARANJA
+        # success VERDE
+        return redirect(url_for('admin.index'))
 
 @admin_bp.route('/usuariosactivos')
 @login_required
@@ -139,3 +142,92 @@ def configuracion():
        
     # Carga login template
     return render_template('admin/configuracion.html', form=form, title='Centros de Ayuda GBA - Configuración')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@admin_bp.route('/usuarios/habilitar/<id>', methods=['GET', 'POST'])
+@login_required
+def actualizar_usuario(id):
+    
+    return id
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+""" @admin_bp.route('usuarios/<nombre>', methods=['GET', 'POST'])
+@login_required
+def buscar_por_nombre():
+        READ
+        Devuelve una lista de usuarios con nombre enviado como parametro
+        ID 6 USER_INDEX permisos
+    id_usuario = current_user.get_id()
+    if User.tiene_permiso(id_usuario, 6):
+        users = User.query.filter_by(first_name=first_name)
+        return render_template('admin/usuarios.html', users=users)
+    else:
+        flash('No tienes permisos para realizar esa acción.')
+        return render_template(url_for('admin.index'))
+
+
+@admin_bp.route('/usuariosactivos')
+@login_required
+def usuariosActivos():
+        READ
+        Devuelve una lista de los usuarios activos
+        ID 6 USER_INDEX permisos
+    id_usuario = current_user.get_id()
+    if User.tiene_permiso(id_usuario, 6):
+        users = User.query.filter_by(active=True)
+        return render_template('admin/usuarios.html', users=users)
+    else:
+        flash('No tienes permisos para realizar esa acción.')
+        return render_template(url_for('admin.index'))
+
+
+@admin_bp.route('/usuariosbloqueados')
+@login_required
+def usuariosBloqueados():
+
+        READ
+        Devuelve una lista de los usuarios bloqueados
+        ID 6 USER_INDEX permisos
+    id_usuario = current_user.get_id()
+    if User.tiene_permiso(id_usuario, 6):
+        users = User.query.filter_by(active=False)
+        return render_template('admin/usuarios.html', users=users)
+    else:
+        flash('No tienes permisos para realizar esa acción.')
+        return render_template(url_for('admin.index'))
+ """

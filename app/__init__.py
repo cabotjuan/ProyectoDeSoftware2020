@@ -16,6 +16,7 @@ def create_app(environment="development"):
     app.config["SECRET_KEY"] = "q7gh8kCFHaa-FsDdG6AtFg"
     login_manager.init_app(app)
     login_manager.login_message = "Debes estar autenticado para ver esta pagina."
+    login_manager.login_message_category = "danger"
     login_manager.login_view = "admin.login"
 
     # Carga de la configuración

@@ -56,36 +56,7 @@ class User(UserMixin, db.Model):
         roles = user.roles
         permiso = roles.filter(Role.permissions.any(id=id_permiso)).all()
         return len(permiso) != 0
-
-
-    @staticmethod
-    def get_by_name(first_name):
-        """
-        Devuelve una lista de usuarios con first_name igual al parametro
-        """
-        return User.query.filter_by(first_name=first_name)
-
-    @staticmethod
-    def get_by_active():
-        """
-        Devuelve una lista de los usuarios activos
-        """
-        return User.query.filter_by(active=True)
-
-    @staticmethod
-    def get_by_blocked():
-        """
-        Devuelve una lista de los usuarios bloqueados
-        """
-        return User.query.filter_by(active=False)
-
-    @staticmethod
-    def all():
-        """
-        Devuelve todos los usuarios del sistema
-        """
-        return User.query.all()
-
+        
 
 # Set up user_loader
 @login_manager.user_loader

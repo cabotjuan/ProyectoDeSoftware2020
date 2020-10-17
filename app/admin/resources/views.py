@@ -45,24 +45,11 @@ def logout():
     logout_user()
     return redirect(url_for('admin.login'))
 
-
-@admin_bp.route('/usuarios', methods=['GET', 'POST'])
-@login_required
-def usuarios():
-    """
-        Vista de modulo CRUD usuarios en administracion.
-    """
-    id_usuario = current_user.get_id()
-    if User.tiene_permiso(id_usuario, 6):
-        users = User.query.all()
-        return render_template('admin/usuarios.html', users=users)
-    return render_template('admin/index.html')
-
-
-@admin_bp.route('usuarios/registrar/', methods=['GET', 'POST'])
+@admin_bp.route('/usuarios/registrar/', methods=['GET', 'POST'])
 @login_required
 def registrar_usuario():
     """
+        CREATE
         Registar un nuevo usuario desde usuario admin
         ID 7 USER_NEW permisos
     """
@@ -96,8 +83,9 @@ def registrar_usuario():
 @login_required
 def listar_usuarios():
     """
-       Vista de modulo CRUD usuarios en administracion.
-       ID 6 USER_INDEX permisos
+        READ
+        Vista de modulo CRUD usuarios en administracion.
+        ID 6 USER_INDEX permisos
     """
     id_usuario = current_user.get_id()
     if User.tiene_permiso(id_usuario, 6):
@@ -108,24 +96,84 @@ def listar_usuarios():
         return redirect(url_for('admin.index'))
 
 
-@admin_bp.route('/usuariosactivos')
+
+@admin_bp.route('/usuarios/activos')
 @login_required
-def usuariosActivos():
+def usuarios_activos():
     """
-       Vista de los usuarios activos
+        READ
+        Devuelve una lista de los usuarios activos
+        ID 6 USER_INDEX permisos
     """
-    users = User.get_by_active()
-    return render_template('admin/usuarios.html', users=users)
+    id_usuario = current_user.get_id()
+    if User.tiene_permiso(id_usuario,6):
+        users = User.query.filter_by(active=True)
+        return render_template('admin/usuarios.html', users=users)
+    else:
+        flash('No tienes permisos para realizar esa acción.')
+        return render_template(url_for('admin.index'))
 
 
-@admin_bp.route('/usuariosbloqueados')
+@admin_bp.route('/usuarios/bloqueados')
 @login_required
-def usuariosBloqueados():
+def usuarios_bloqueados():
     """
-       Vista de los usuarios activos
+        READ
+        Devuelve una lista de los usuarios bloqueados
+        ID 6 USER_INDEX permisos
     """
-    users = User.get_by_blocked()
-    return render_template('admin/usuarios.html', users=users)
+    id_usuario = current_user.get_id()
+    if User.tiene_permiso(id_usuario,6):
+        users = User.query.filter_by(active=False)
+        return render_template('admin/usuarios.html', users=users)
+    else:
+        flash('No tienes permisos para realizar esa acción.')
+        return render_template(url_for('admin.index'))
+
+
+@admin_bp.route('/usuarios/pornombre/<nombre>', methods=['GET', 'POST'])
+@login_required
+def buscar_por_nombre(nombre):
+    """
+        READ
+        Devuelve una lista de usuarios con nombre enviado como parametro
+        ID 6 USER_INDEX permisos
+    """
+    id_usuario = current_user.get_id()
+    if User.tiene_permiso(id_usuario,6):
+        users = User.query.filter_by(first_name=nombre)
+        return render_template('admin/usuarios.html', users=users)
+    else:
+        flash('No tienes permisos para realizar esa acción.')
+        return render_template(url_for('admin.index'))
+
+
+@admin_bp.route('/usuarios/activar/<id>', methods=['GET', 'POST'])
+@login_required
+def activar_bloquear(id):
+    """
+        READ
+        Bloquea un usuario activo 
+        /
+        Activa un usuario bloqueado
+        ID 9 USER_UPDATE permisos
+    """
+    user_edit = User.query.filter_by(id=id).first()
+    if not user_edit:
+        flash('El usuario solicitado no existe.')
+        return redirect(url_for('admin.index'))
+
+    id_usuario = current_user.get_id()
+    if User.tiene_permiso(id_usuario,9):
+        user = User.query.get(id)
+        user.active = not user.active
+        db.session.commit()
+        flash('Los cambios se guardaron correctamente.')
+        return redirect(url_for('admin.listar_usuarios'))
+    else:
+        flash('No tienes permisos para realizar esa acción.')
+        return render_template(url_for('admin.index'))
+
 
 
 @admin_bp.route('/configuracion', methods=['GET', 'POST'])
@@ -151,6 +199,7 @@ def configuracion():
     else:
         flash('No tienes permisos para realizar esa acción.')
         return redirect(url_for('admin.index'))
+
 
 
 @admin_bp.route('usuarios/actualizar/<id_user>', methods=['GET', 'POST'])
@@ -221,3 +270,5 @@ def eliminar_usuario(id):
     else:
         flash('No tienes permisos para realizar esa acción.')
         return redirect(url_for('admin.listar_usuarios'))
+
+

@@ -16,9 +16,9 @@
 
 <div class="container-fluid">
   <div class="row">
-    <button class="btn-success btn m-auto"><i class="fas fa-user-plus"></i>Nuevo usuario</button>
+    <a class='m-auto' href="{{ url_for('admin.registrar_usuario') }}"> <button class="btn-success btn"><i class="fas fa-user-plus"></i>Nuevo usuario</button></a>
     <div class="search-box d-inline m-auto">
-      <form action="submit">
+      <form action="{{ url_for('admin.buscar_por_nombre') }}" method="POST">
         <input type="search" placeholder='Buscar nombre...' name="buscar-nombre" id="name_search_box">
         <button class="btn btn-info btn-sm">Buscar</button>
       </form>
@@ -30,9 +30,9 @@
       </a>
 
       <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-        <a class="dropdown-item active" href="#">Todo</a>
-        <a class="dropdown-item" href="#">Activos</a>
-        <a class="dropdown-item" href="#">Inactivos</a>
+        <a class="dropdown-item" href="{{ url_for('admin.listar_usuarios') }}">Todo</a>
+        <a class="dropdown-item" href="{{ url_for('admin.usuarios_activos') }}">Activos</a>
+        <a class="dropdown-item" href="{{ url_for('admin.usuarios_bloqueados') }}">Inactivos</a>
       </div>
     </div>
   </div>
@@ -50,9 +50,9 @@
       {% for user in users %}
       {% if user.active %}
       <tr>
-      {% else %}
+        {% else %}
       <tr class="table-warning">
-      {% endif %}
+        {% endif %}
         <th scope="row">
           {% for role in user.roles %}
           {% if role.id == 1 %}
@@ -65,12 +65,13 @@
         <td>{{ user.first_name }}</td>
         <td>{{ user.last_name }}</td>
         <td>
-          <a href="{{ url_for('admin.actualizar_usuario', id=user.id) }}"><i class="fas fa-user-edit text-success"
-              title="Editar"></i></a>
+          <a href="#"><i class="fas fa-user-edit text-success" title="Editar"></i></a>
           {% if user.active %}
-          <a href="#DESACTIVAR"><i class="fas fa-user-slash text-secondary" title="Deshabilitar"></i></a>
+          <a href="{{ url_for('admin.activar_bloquear', id=user.id) }}"><i class="fas fa-user-slash text-secondary"
+              title="Deshabilitar"></i></a>
           {% else %}
-          <a href="#DESACTIVAR"><i class="fas fa-user-slash text-warning" title="Habilitar"></i></a>
+          <a href="{{ url_for('admin.activar_bloquear', id=user.id) }}"><i class="fas fa-user-slash text-warning"
+              title="Habilitar"></i></a>
           {% endif %}
           <a href="#BORRAR"><i class="fas fa-trash-alt text-danger" title="Eliminar"></i></a>
         </td>

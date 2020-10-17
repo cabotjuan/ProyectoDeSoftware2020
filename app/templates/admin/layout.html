@@ -29,10 +29,12 @@
             <a class="nav-link" href="{{ url_for('admin.listar_usuarios') }}">Usuarios <i class="fas fa-users"></i> </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link nav-menu-toggler" href="{{ url_for('admin.configuracion') }}">Configuracion <i class="fas fa-cogs"></i> </a>
+            <a class="nav-link nav-menu-toggler" href="{{ url_for('admin.configuracion') }}">Configuracion <i
+                class="fas fa-cogs"></i> </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link nav-menu-toggler" href="{{ url_for('admin.logout') }}">Cerrar Sesion <i class="fas fa-sign-out-alt"></i></a>
+            <a class="nav-link nav-menu-toggler" href="{{ url_for('admin.logout') }}">Cerrar Sesion <i
+                class="fas fa-sign-out-alt"></i></a>
           </li>
         </ul>
       </div>
@@ -49,9 +51,9 @@
     {% if messages %}
     <ul class=flashes>
       {% for category, message in messages %}
-        <div class="alert alert-{{ category }}" role="alert">
-          {{ message }}
-        </div>
+      <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+      </div>
       {% endfor %}
     </ul>
     {% endif %}
@@ -61,7 +63,8 @@
   </div>
 
   <footer id="footer">
-    <h6>• Grupo 5 <a class="text-white" href="https://gitlab.catedras.linti.unlp.edu.ar/proyecto2020/grupo5"><i class="fab fa-gitlab"></i></a> • Proyecto 2020</h6>
+    <h6>• Grupo 5 <a class="text-white" href="https://gitlab.catedras.linti.unlp.edu.ar/proyecto2020/grupo5"><i
+          class="fab fa-gitlab"></i></a> • Proyecto 2020</h6>
   </footer>
 
   <!-- Bootstrap Scripts -->

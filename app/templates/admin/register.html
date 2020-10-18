@@ -7,10 +7,10 @@
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
         <li class="breadcrumb-item"><a href="{{ url_for('admin.listar_usuarios') }}">Usuarios</a></li>
-        <li class="breadcrumb-item active" aria-current="Nuevo usuario">Nuevo Usuario</li>
+        <li class="breadcrumb-item active" aria-current="page">Nuevo Usuario</li>
     </ol>
 </nav>
-<form action="" method="post" novalidate>
+<form method="post" novalidate>
     {{ form.hidden_tag() }}
     <div class="container-fluid">
         <div class="row d-flex justify-content-center">

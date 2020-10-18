@@ -12,13 +12,13 @@
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
         <li class="breadcrumb-item"><a href="{{ url_for('admin.listar_usuarios') }}">Usuarios</a></li>
-        <li class="breadcrumb-item active" aria-current="Editar usuario">
+        <li class="breadcrumb-item active" aria-current="page"> 
             {{ form.username.data }}
         </li>
     </ol>
 </nav>
 
-<form action="" method="post" novalidate>
+<form method="post" novalidate>
     <div class="container-fluid">
         <div class="row d-flex justify-content-center">
             <div class="col-md-4 align-self-center">

@@ -6,13 +6,13 @@
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
-        <li class="breadcrumb-item active" aria-current="Editar configuracion de sistema">
+        <li class="breadcrumb-item active" aria-current="page">
             Configuracion de sistema
         </li>
     </ol>
 </nav>
 
-<form action="" method="post" novalidate>
+<form method="post" novalidate>
     <div class="container-fluid">
         <div class="row d-flex justify-content-center">
             <div class="col-md-4 align-self-center">
@@ -41,7 +41,7 @@
                 </div>
                 <div>
                     {{ form.n_elements.label }}
-                    {{ form.n_elements(type='number', min=0, id='n_elem') }}<br>
+                    {{ form.n_elements(type='number', min=0) }}<br>
                     {% for error in form.n_elements.errors %}
                     <span style="color: red;">{{ error }}</span>
                     {% endfor %}
@@ -61,6 +61,5 @@
         </div>
     </div>
 </form>
-</div>
 
 {% endblock %}

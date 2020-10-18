@@ -10,18 +10,18 @@
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
-    <li class="breadcrumb-item active" aria-current="Usuarios">Usuarios</li>
+    <li class="breadcrumb-item active" aria-current="page">Usuarios</li>
   </ol>
 </nav>
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col d-flex justify-content-start p-2">
-      <div class="search-box d-inline">
+    <div class="col d-flex justify-content-center p-2">
+      <div class="search-box d-inline-flex">
         <form action="{{ url_for('admin.buscar_por_nombre') }}" method="POST">
           <div class="input-group mb-3">
-            <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..." aria-label="buscar por nombre"
-              aria-describedby="buscar-boton">
+            <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..."
+              aria-label="buscar por nombre" aria-describedby="buscar-boton">
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="button" id="buscar-boton">Ok</button>
             </div>
@@ -30,8 +30,10 @@
         </form>
       </div>
     </div>
-    <div class="col d-flex justify-content-end p-2">
-      <a href="{{ url_for('admin.listar_usuarios') }}"> <button class="btn-outline-info btn mr-1">Limpiar</button></a>
+    <div class="col d-flex justify-user-options p-2">
+      <div >
+        <a class="btn btn-outline-secondary" href="{{ url_for('admin.listar_usuarios') }}">Limpiar</a>
+      </div>
       <div class="dropleft mr-1">
         <a class="btn btn-secondary " href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
           aria-haspopup="true" aria-expanded="false">
@@ -44,8 +46,9 @@
           <a class="dropdown-item" href="{{ url_for('admin.usuarios_bloqueados') }}">Inactivos</a>
         </div>
       </div>
-      <a href="{{ url_for('admin.registrar_usuario') }}"> <button class="btn-success btn"><i
-            class="fas fa-user-plus"></i> </button></a>
+      <div >
+        <a class="btn-success btn" href="{{ url_for('admin.registrar_usuario') }}"><i class="fas fa-user-plus"></i> </a>
+      </div>
     </div>
   </div>
   <div class="table-responsive">
@@ -63,9 +66,9 @@
       <tbody>
         {% for user in users %}
         {% if user.active %}
-        <tr>
+        <tr id="{{ user.username }}">
           {% else %}
-        <tr class="table-warning">
+        <tr class="table-warning" id="{{ user.username }}">
           {% endif %}
           <th scope="row">
             {% for role in user.roles %}
@@ -90,31 +93,30 @@
             {% endif %}
             <a><i class="fas fa-trash-alt text-danger" title="Eliminar" data-toggle="modal"
                 data-target="#{{ user.username}}-modal"></i></a>
-          </td>
-        </tr>
-
-        <div id="{{ user.username }}-modal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog"
-          aria-labelledby="mySmallModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalCenterTitle">Eliminar usuario</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                ¿Estás seguro que deseas eliminar el usuario <b>{{ user.username }}</b>?
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
-                  aria-label="Cancelar">Cancelar</button>
-                <a class="btn btn-danger" href="{{ url_for('admin.eliminar_usuario', id=user.id) }}"
-                  aria-label="Borrar">Borrar</a>
+            <div id="{{ user.username }}-modal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog"
+              aria-labelledby="{{ user.username }}-modal-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="{{ user.username }}-modal-title">Eliminar usuario</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    ¿Estás seguro que deseas eliminar el usuario <b>{{ user.username }}</b>?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
+                      aria-label="Cancelar">Cancelar</button>
+                    <a class="btn btn-danger" href="{{ url_for('admin.eliminar_usuario', id=user.id) }}"
+                      aria-label="Borrar">Borrar</a>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </td>
+        </tr>
 
         {% endfor %}
       </tbody>

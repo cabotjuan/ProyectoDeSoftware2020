@@ -1,11 +1,12 @@
 from flask import flash, redirect, session, render_template, url_for, Blueprint, request
 from app.models.model import User, Role, Permission, users_roles, Config
 from app.extensions import db
-from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm
+from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm, EditForm
 from flask_login import login_required, login_user, logout_user, current_user
 
 # Blueprint Administracion
 admin_bp = Blueprint('admin', __name__)
+
 
 @admin_bp.route('/')
 @login_required
@@ -14,6 +15,7 @@ def index():
         Renderizar la pagina principal de la administracion.
     """
     return render_template('admin/index.html')
+
 
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -53,7 +55,7 @@ def registrar_usuario():
         ID 7 USER_NEW permisos
     """
     id_usuario = current_user.get_id()
-    if User.tiene_permiso(id_usuario,7):
+    if User.tiene_permiso(id_usuario, 7):
         form = RegistrationForm()
 
         # POST.
@@ -87,7 +89,7 @@ def listar_usuarios():
         ID 6 USER_INDEX permisos
     """
     id_usuario = current_user.get_id()
-    if User.tiene_permiso(id_usuario,6):
+    if User.tiene_permiso(id_usuario, 6):
         users = User.query.all()
         return render_template('admin/usuarios.html', users=users)
     else:
@@ -104,11 +106,11 @@ def usuarios_activos():
         ID 6 USER_INDEX permisos
     """
     id_usuario = current_user.get_id()
-    if User.tiene_permiso(id_usuario,6):
+    if User.tiene_permiso(id_usuario, 6):
         users = User.query.filter_by(active=True)
         return render_template('admin/usuarios.html', users=users)
     else:
-        flash('No tienes permisos para realizar esa acción.','danger')
+        flash('No tienes permisos para realizar esa acción.', 'danger')
         return render_template(url_for('admin.index'))
 
 
@@ -121,11 +123,11 @@ def usuarios_bloqueados():
         ID 6 USER_INDEX permisos
     """
     id_usuario = current_user.get_id()
-    if User.tiene_permiso(id_usuario,6):
+    if User.tiene_permiso(id_usuario, 6):
         users = User.query.filter_by(active=False)
         return render_template('admin/usuarios.html', users=users)
     else:
-        flash('No tienes permisos para realizar esa acción.','danger')
+        flash('No tienes permisos para realizar esa acción.', 'danger')
         return render_template(url_for('admin.index'))
 
 
@@ -139,17 +141,11 @@ def buscar_por_nombre():
     """
     nombre = request.form.get('buscar-nombre')
     id_usuario = current_user.get_id()
-    if User.tiene_permiso(id_usuario,6):
+    if User.tiene_permiso(id_usuario, 6):
         users = User.query.filter_by(first_name=nombre)
-        print('___________________')
-        print('___________________')
-        print('_________LAALA__________')
-        print(users.all())
-        print('___________________')
-        print('___________________')
         return render_template('admin/usuarios.html', users=users)
     else:
-        flash('No tienes permisos para realizar esa acción.','danger')
+        flash('No tienes permisos para realizar esa acción.', 'danger')
         return render_template(url_for('admin.index'))
 
 
@@ -169,7 +165,7 @@ def activar_bloquear(id):
         return redirect(url_for('admin.index'))
 
     id_usuario = current_user.get_id()
-    if User.tiene_permiso(id_usuario,9):
+    if User.tiene_permiso(id_usuario, 9):
         user = User.query.get(id)
         user.active = not user.active
         db.session.commit()
@@ -186,62 +182,101 @@ def configuracion():
     """
       Vista de configuracion de sistema en administracion.
     """
-    # Trae la informacion ya cargada para mostrarla en el formulario cuando method=GET
-    config = Config.query.first()
-    form = ConfigForm(obj=config)
-
-    # Guarda la informacion cargada desde el template cuando method=POST
-    if form.validate_on_submit():
-       form.populate_obj(config) 
-       db.session.commit()
-       
-    # Carga login template
-    return render_template('admin/configuracion.html', form=form, title='Centros de Ayuda GBA - Configuración')
-
-
-
-""" @admin_bp.route('usuarios/<nombre>', methods=['GET', 'POST'])
-@login_required
-def buscar_por_nombre():
-        READ
-        Devuelve una lista de usuarios con nombre enviado como parametro
-        ID 6 USER_INDEX permisos
     id_usuario = current_user.get_id()
-    if User.tiene_permiso(id_usuario, 6):
-        users = User.query.filter_by(first_name=first_name)
-        return render_template('admin/usuarios.html', users=users)
+    if User.tiene_permiso(id_usuario, 10):
+        # Trae la informacion ya cargada para mostrarla en el formulario cuando method=GET
+        config = Config.query.first()
+        if not config:
+            form = ConfigForm()
+            # Guarda la informacion cargada desde el template cuando method=POST
+            if form.validate_on_submit():
+                config = Config(
+                    title=form.title.data,
+                    description=form.description.data,
+                    email=form.email.data,
+                    n_elements=form.n_elements.data,
+                    site_enabled=form.site_enabled.data)
+                db.session.add(config)
+                flash('Los cambios se guardaron correctamente.', 'success')
+        else:
+            form = ConfigForm(obj=config)
+            # Guarda la informacion cargada desde el template cuando method=POST
+            if form.validate_on_submit():
+                form.populate_obj(config)
+                flash('Los cambios se guardaron correctamente.', 'success')
+        db.session.commit()
+        return render_template('admin/configuracion.html', form=form, title='Centros de Ayuda GBA - Configuración')
     else:
-        flash('No tienes permisos para realizar esa acción.')
-        return render_template(url_for('admin.index'))
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
 
-@admin_bp.route('/usuariosactivos')
+@admin_bp.route('usuarios/actualizar/<id_user>', methods=['GET', 'POST'])
 @login_required
-def usuariosActivos():
-        READ
-        Devuelve una lista de los usuarios activos
-        ID 6 USER_INDEX permisos
-    id_usuario = current_user.get_id()
-    if User.tiene_permiso(id_usuario, 6):
-        users = User.query.filter_by(active=True)
-        return render_template('admin/usuarios.html', users=users)
+def actualizar_usuario(id_user):
+    """
+        Vista de actualizacion de un usuario enviado como parámetro con un usuario admin
+        Requiere permiso con ID 9 (USER_UPDATE)
+    """
+    user_edit = User.query.filter_by(id=id_user).first()
+
+    if not user_edit:
+        flash('El usuario solicitado no existe.', 'danger')
+        return redirect(url_for('admin.index'))
+
+    id_admin = current_user.get_id()
+    if User.tiene_permiso(id_admin, 9):
+        roles = user_edit.roles.all()
+        es_admin = Role.query.filter_by(name='admin').first() in roles
+        es_operador = Role.query.filter_by(name='operador').first() in roles
+        form = EditForm(obj=user_edit, id=id_user,
+                        admin=es_admin, operator=es_operador)
+
+        # POST.
+        if form.validate_on_submit():
+            form.populate_obj(user_edit)
+            if form.admin.data:
+                if not es_admin:
+                    user_edit.roles.append(Role.query.get(1))
+            elif es_admin:
+                user_edit.roles.remove(Role.query.get(1))
+            if form.operator.data:
+                if not es_operador:
+                    user_edit.roles.append(Role.query.get(2))
+            elif es_operador:
+                user_edit.roles.remove(Role.query.get(2))
+
+            db.session.commit()
+            # redirecciona al listado de usuarios
+            flash('Los cambios se guardaron correctamente.', 'success')
+            return redirect(url_for('admin.listar_usuarios'))
+
+        return render_template('admin/update_user.html', form=form, title='Centros de Ayuda GBA - Configuración')
     else:
-        flash('No tienes permisos para realizar esa acción.')
-        return render_template(url_for('admin.index'))
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
 
-@admin_bp.route('/usuariosbloqueados')
+@admin_bp.route('usuarios/borrar/<id>', methods=['GET', 'POST'])
 @login_required
-def usuariosBloqueados():
+def eliminar_usuario(id):
+    """
+        Vista de eliminacion de un usuario, enviado como parámetro con sus relaciones, con un usuario admin
+        Requiere permiso con ID8 (USER_DESTROY)
+    """
+    user_delete = User.query.filter_by(id=id).first()
+    if not user_delete:
+        flash('El usuario solicitado no existe.', 'danger')
+        return redirect(url_for('admin.index'))
 
-        READ
-        Devuelve una lista de los usuarios bloqueados
-        ID 6 USER_INDEX permisos
-    id_usuario = current_user.get_id()
-    if User.tiene_permiso(id_usuario, 6):
-        users = User.query.filter_by(active=False)
-        return render_template('admin/usuarios.html', users=users)
+    id_admin = current_user.get_id()
+    if User.tiene_permiso(id_admin, 8):
+
+        db.session.delete(user_delete)
+        db.session.commit()
+
+        flash('El usuario se eliminó correctamente', 'success')
+        return redirect(url_for('admin.listar_usuarios'))
     else:
-        flash('No tienes permisos para realizar esa acción.')
-        return render_template(url_for('admin.index'))
- """
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.listar_usuarios'))

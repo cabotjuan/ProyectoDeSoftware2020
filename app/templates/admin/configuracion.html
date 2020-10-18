@@ -1,0 +1,65 @@
+{% extends "admin/layout.html" %}
+{% block title %}Centros Ayuda GBA - Administracion - Configuracion {% endblock %}
+
+{% block content %}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
+        <li class="breadcrumb-item active" aria-current="page">
+            Configuracion de sistema
+        </li>
+    </ol>
+</nav>
+
+<form method="post" novalidate>
+    <div class="container-fluid">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-4 align-self-center">
+
+                {{ form.hidden_tag() }}
+                <div>
+                    {{ form.title.label }}
+                    {{ form.title(class="form-control") }}<br>
+                    {% for error in form.title.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.description.label }}
+                    {{ form.description(class="form-control") }}<br>
+                    {% for error in form.description.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.email.label }}
+                    {{ form.email(class="form-control") }}<br>
+                    {% for error in form.email.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.n_elements.label }}
+                    {{ form.n_elements(type='number', min=0) }}<br>
+                    {% for error in form.n_elements.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div class="custom-control custom-switch justify-content-center">
+                    {{ form.site_enabled(class="custom-control-input") }}
+                    {{ form.site_enabled.label(class="custom-control-label") }}
+                    {% for error in form.site_enabled.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <hr>
+                {{ form.submit(class='btn btn-lg btn-primary btn-block') }}
+                <a class="btn btn-lg btn-outline-secondary btn-block" href="{{ url_for('admin.index') }}">Cancelar</a>
+                <hr>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

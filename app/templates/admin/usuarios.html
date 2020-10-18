@@ -1,0 +1,128 @@
+{% extends "admin/layout.html" %}
+{% block title %}Centros Ayuda GBA - Administracion - Usuarios{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block navbar %}
+
+{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Usuarios</li>
+  </ol>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col d-flex justify-content-center p-2">
+      <div class="search-box d-inline-flex">
+        <form action="{{ url_for('admin.buscar_por_nombre') }}" method="POST">
+          <div class="input-group mb-3">
+            <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..."
+              aria-label="buscar por nombre" aria-describedby="buscar-boton">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" id="buscar-boton">Ok</button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+    <div class="col d-flex justify-user-options p-2">
+      <div >
+        <a class="btn btn-outline-secondary" href="{{ url_for('admin.listar_usuarios') }}">Limpiar</a>
+      </div>
+      <div class="dropleft mr-1">
+        <a class="btn btn-secondary " href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-filter"></i>
+        </a>
+
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+          <a class="dropdown-item" href="{{ url_for('admin.listar_usuarios') }}">Todo</a>
+          <a class="dropdown-item" href="{{ url_for('admin.usuarios_activos') }}">Activos</a>
+          <a class="dropdown-item" href="{{ url_for('admin.usuarios_bloqueados') }}">Inactivos</a>
+        </div>
+      </div>
+      <div >
+        <a class="btn-success btn" href="{{ url_for('admin.registrar_usuario') }}"><i class="fas fa-user-plus"></i> </a>
+      </div>
+    </div>
+  </div>
+  <div class="table-responsive">
+
+    <table class="table table-sm table-hover table-light table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Rol</th>
+          <th scope="col">Email</th>
+          <th scope="col">Nombre</th>
+          <th scope="col">Apellido</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        {% if user.active %}
+        <tr id="{{ user.username }}">
+          {% else %}
+        <tr class="table-warning" id="{{ user.username }}">
+          {% endif %}
+          <th scope="row">
+            {% for role in user.roles %}
+            {% if role.id == 1 %}
+            <span class="badge badge-dark">{{ role.description }}</span><br>
+            {% else %}
+            <span class="badge badge-secondary">{{ role.description }}</span><br>
+            {% endif %}
+            {% endfor %} </th>
+          <td>{{ user.email }}</td>
+          <td>{{ user.first_name }}</td>
+          <td>{{ user.last_name }}</td>
+          <td>
+            <a href="{{ url_for('admin.actualizar_usuario', id_user=user.id) }}"><i
+                class="fas fa-user-edit text-success" title="Editar"></i></a>
+            {% if user.active %}
+            <a href="{{ url_for('admin.activar_bloquear', id=user.id) }}"><i class="fas fa-user-slash text-secondary"
+                title="Deshabilitar"></i></a>
+            {% else %}
+            <a href="{{ url_for('admin.activar_bloquear', id=user.id) }}"><i class="fas fa-user-slash text-warning"
+                title="Habilitar"></i></a>
+            {% endif %}
+            <a><i class="fas fa-trash-alt text-danger" title="Eliminar" data-toggle="modal"
+                data-target="#{{ user.username}}-modal"></i></a>
+            <div id="{{ user.username }}-modal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog"
+              aria-labelledby="{{ user.username }}-modal-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="{{ user.username }}-modal-title">Eliminar usuario</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    ¿Estás seguro que deseas eliminar el usuario <b>{{ user.username }}</b>?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
+                      aria-label="Cancelar">Cancelar</button>
+                    <a class="btn btn-danger" href="{{ url_for('admin.eliminar_usuario', id=user.id) }}"
+                      aria-label="Borrar">Borrar</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+{% endblock %}

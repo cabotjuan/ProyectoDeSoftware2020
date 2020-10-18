@@ -1,0 +1,90 @@
+{% extends "admin/layout.html" %}
+
+{% block title %} {{title}} {% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.listar_usuarios') }}">Usuarios</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Nuevo Usuario</li>
+    </ol>
+</nav>
+<form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="container-fluid">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-4 align-self-center">
+                <div>
+                    {{ form.email.label }}
+                    {{ form.email(class="form-control") }}<br>
+                    {% for error in form.email.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.username.label }}
+                    {{ form.username(class="form-control") }}<br>
+                    {% for error in form.username.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.first_name.label }}
+                    {{ form.first_name(class="form-control") }}<br>
+                    {% for error in form.first_name.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.last_name.label }}
+                    {{ form.last_name(class="form-control") }}<br>
+                    {% for error in form.last_name.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4 align-self-center">
+                <div>
+                    {{ form.password.label }}
+                    {{ form.password(class="form-control") }}<br>
+                    {% for error in form.password.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.confirm_password.label }}
+                    {{ form.confirm_password(class="form-control") }}<br>
+                    {% for error in form.confirm_password.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div class="custom-control custom-switch justify-content-center">
+                    {{ form.active(class="custom-control-input")|default(true) }}
+                    {{ form.active.label(class="custom-control-label") }}
+                    {% for error in form.active.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div><hr>
+                <h5>Roles</h5>
+                <div class="form-check form-check-inline m-auto">
+                    {{ form.admin(class="form-check-input")|default(true) }}
+                    {{ form.admin.label(class="form-check-label badge badge-dark") }}  
+                    {% for error in form.admin.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}  
+                </div>
+                <div class="form-check form-check-inline m-auto"> 
+                    {{ form.operator(class="form-check-input")|default(true) }}
+                    {{ form.operator.label(class="form-check-label badge badge-secondary") }}
+                    {% for error in form.operator.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div><hr>
+                {{ form.submit(class='btn btn-lg btn-primary btn-block') }}
+                <a class="btn btn-lg btn-outline-secondary btn-block" href="{{ url_for('admin.listar_usuarios') }}">Cancelar</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

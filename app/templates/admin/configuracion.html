@@ -41,7 +41,7 @@
                 </div>
                 <div>
                     {{ form.n_elements.label }}
-                    {{ form.n_elements(class="form-control") }}<br>
+                    {{ form.n_elements(type='number', min=0, id='n_elem') }}<br>
                     {% for error in form.n_elements.errors %}
                     <span style="color: red;">{{ error }}</span>
                     {% endfor %}
@@ -55,8 +55,7 @@
                 </div>
                 <hr>
                 {{ form.submit(class='btn btn-lg btn-primary btn-block') }}
-                <a class="btn btn-lg btn-outline-secondary btn-block"
-                href="{{ url_for('admin.index') }}">Cancelar</a>
+                <a class="btn btn-lg btn-outline-secondary btn-block" href="{{ url_for('admin.index') }}">Cancelar</a>
                 <hr>
             </div>
         </div>

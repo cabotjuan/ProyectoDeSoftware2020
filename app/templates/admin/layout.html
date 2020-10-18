@@ -12,61 +12,61 @@
 </head>
 
 <body>
-    <header>
-      <nav class="navbar bg-color-1">
-        <a class="navbar-brand" href="{{ url_for('admin.index') }}">
-          <img src="../../../static/img/Logo.png" width="200" height="75" alt="">
-        </a>
-        {% if current_user.is_authenticated %}
-        <button class="navbar-toggler username-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="username"> {{current_user.username}} </span><i class="fas fa-user-circle"
-            style="color:#fafafa; font-size: 2rem;"></i>
-        </button>
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-          <ul class="navbar-nav align-items-end">
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('admin.listar_usuarios') }}">Usuarios <i class="fas fa-users"></i>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link nav-menu-toggler" href="{{ url_for('admin.configuracion') }}">Configuracion <i
-                  class="fas fa-cogs"></i> </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link nav-menu-toggler" href="{{ url_for('admin.logout') }}">Cerrar Sesion <i
-                  class="fas fa-sign-out-alt"></i></a>
-            </li>
-          </ul>
-        </div>
-        {% else %}
-        <a class="nav-link" href="{{ url_for('admin.login') }}">Iniciar Sesion</a>
-        {% endif %}
-      </nav>
-
-
-    </header>
-
-    <div class="bg-color-2 flex-grow-1 mb-4">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-      <ul class=flashes>
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }}" role="alert">
-          {{ message }}
-        </div>
-        {% endfor %}
-      </ul>
+  <header>
+    <nav class="navbar bg-color-1">
+      <a class="navbar-brand" href="{{ url_for('admin.index') }}">
+        <img src="../../../static/img/Logo.png" width="200" height="75" alt="">
+      </a>
+      {% if current_user.is_authenticated %}
+      <button class="navbar-toggler username-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="username"> {{current_user.username}} </span><i class="fas fa-user-circle"
+          style="color:#fafafa; font-size: 2rem;"></i>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav align-items-end">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin.listar_usuarios') }}">Usuarios <i class="fas fa-users"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-menu-toggler" href="{{ url_for('admin.configuracion') }}">Configuracion <i
+                class="fas fa-cogs"></i> </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-menu-toggler" href="{{ url_for('admin.logout') }}">Cerrar Sesion <i
+                class="fas fa-sign-out-alt"></i></a>
+          </li>
+        </ul>
+      </div>
+      {% else %}
+      <a class="nav-link" href="{{ url_for('admin.login') }}">Iniciar Sesion</a>
       {% endif %}
-      {% endwith %}
-      {% block content %}
-      {% endblock %}
-    </div>
+    </nav>
 
-    <footer id="footer">
-      <h6>• Grupo 5 <a class="text-white" href="https://gitlab.catedras.linti.unlp.edu.ar/proyecto2020/grupo5"><i
-            class="fab fa-gitlab"></i></a> • Proyecto 2020</h6>
-    </footer>
+
+  </header>
+
+  <div class="bg-color-2 flex-grow-1 mb-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class=flashes>
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    {% block content %}
+    {% endblock %}
+  </div>
+
+  <footer id="footer">
+    <h6>• Grupo 5 <a class="text-white" href="https://gitlab.catedras.linti.unlp.edu.ar/proyecto2020/grupo5"><i
+          class="fab fa-gitlab"></i></a> • Proyecto 2020</h6>
+  </footer>
   <!-- Bootstrap Scripts -->
 
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
@@ -78,6 +78,16 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
     integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
     crossorigin="anonymous"></script>
+  <script>
+    $('#n_elem').keypress((e) => {
+      let a = []
+      let k = e.which
+      for (i = 48; i < 58; i++)
+        a.push(i)
+      if (!(a.indexOf(k) >= 0))
+        e.preventDefault()
+    });
+  </script>
 
 </body>
 

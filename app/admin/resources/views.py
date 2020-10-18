@@ -77,7 +77,10 @@ def registrar_usuario():
 
             # redirecciona a pagina login.
             return redirect(url_for('admin.listar_usuarios'))
-    return render_template('admin/register.html', form=form, title='Centros de Ayuda GBA - Registro')
+        return render_template('admin/register.html', form=form, title='Centros de Ayuda GBA - Registro')
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
 
 @admin_bp.route('/usuarios/listar/', methods=['GET', 'POST'])
@@ -111,7 +114,7 @@ def usuarios_activos():
         return render_template('admin/usuarios.html', users=users)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
-        return render_template(url_for('admin.index'))
+        return redirect(url_for('admin.index'))
 
 
 @admin_bp.route('/usuarios/bloqueados')
@@ -128,7 +131,7 @@ def usuarios_bloqueados():
         return render_template('admin/usuarios.html', users=users)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
-        return render_template(url_for('admin.index'))
+        return redirect(url_for('admin.index'))
 
 
 @admin_bp.route('/usuarios/buscar/', methods=['GET', 'POST'])
@@ -146,7 +149,7 @@ def buscar_por_nombre():
         return render_template('admin/usuarios.html', users=users)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
-        return render_template(url_for('admin.index'))
+        return redirect(url_for('admin.index'))
 
 
 @admin_bp.route('/usuarios/activar/<id>', methods=['GET', 'POST'])
@@ -159,13 +162,14 @@ def activar_bloquear(id):
         Activa un usuario bloqueado
         ID 9 USER_UPDATE permisos
     """
-    user_edit = User.query.filter_by(id=id).first()
-    if not user_edit:
-        flash('El usuario solicitado no existe.')
-        return redirect(url_for('admin.index'))
-
     id_usuario = current_user.get_id()
     if User.tiene_permiso(id_usuario, 9):
+
+        user_edit = User.query.filter_by(id=id).first()
+        if not user_edit:
+            flash('El usuario solicitado no existe.', 'danger')
+            return redirect(url_for('admin.index'))
+
         user = User.query.get(id)
         user.active = not user.active
         db.session.commit()
@@ -173,7 +177,7 @@ def activar_bloquear(id):
         return redirect(url_for('admin.listar_usuarios'))
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
-        return render_template(url_for('admin.index'))
+        return redirect(url_for('admin.index'))
 
 
 @admin_bp.route('/configuracion', methods=['GET', 'POST'])
@@ -218,14 +222,15 @@ def actualizar_usuario(id_user):
         Vista de actualizacion de un usuario enviado como parámetro con un usuario admin
         Requiere permiso con ID 9 (USER_UPDATE)
     """
-    user_edit = User.query.filter_by(id=id_user).first()
-
-    if not user_edit:
-        flash('El usuario solicitado no existe.', 'danger')
-        return redirect(url_for('admin.index'))
 
     id_admin = current_user.get_id()
     if User.tiene_permiso(id_admin, 9):
+
+        user_edit = User.query.filter_by(id=id_user).first()
+        if not user_edit:
+            flash('El usuario solicitado no existe.', 'danger')
+            return redirect(url_for('admin.index'))
+
         roles = user_edit.roles.all()
         es_admin = Role.query.filter_by(name='admin').first() in roles
         es_operador = Role.query.filter_by(name='operador').first() in roles
@@ -264,13 +269,14 @@ def eliminar_usuario(id):
         Vista de eliminacion de un usuario, enviado como parámetro con sus relaciones, con un usuario admin
         Requiere permiso con ID8 (USER_DESTROY)
     """
-    user_delete = User.query.filter_by(id=id).first()
-    if not user_delete:
-        flash('El usuario solicitado no existe.', 'danger')
-        return redirect(url_for('admin.index'))
 
     id_admin = current_user.get_id()
     if User.tiene_permiso(id_admin, 8):
+
+        user_delete = User.query.filter_by(id=id).first()
+        if not user_delete:
+            flash('El usuario solicitado no existe.', 'danger')
+            return redirect(url_for('admin.index'))
 
         db.session.delete(user_delete)
         db.session.commit()
@@ -279,4 +285,4 @@ def eliminar_usuario(id):
         return redirect(url_for('admin.listar_usuarios'))
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
-        return redirect(url_for('admin.listar_usuarios'))
+        return redirect(url_for('admin.index'))

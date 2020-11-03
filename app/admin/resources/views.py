@@ -3,7 +3,7 @@ from app.models.model import User, Role, Permission, users_roles, Config
 from app.extensions import db
 from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm, EditForm
 from flask_login import login_required, login_user, logout_user, current_user
-
+from sqlalchemy import or_
 # Blueprint Administracion
 admin_bp = Blueprint('admin', __name__)
 
@@ -20,7 +20,7 @@ def index():
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """
-        Autenticar usuario con LoginForm. Si es valido, redirige a Administracion. 
+        Autenticar usuario con LoginForm. Si es valido, redirige a Administracion.
     """
     form = LoginForm()
     if form.validate_on_submit():
@@ -28,6 +28,11 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(
                 form.password.data):
+            # Verificar si usuario esta deshabilitado
+            if not user.active:
+                flash('Tu cuenta ha sido deshabilitada.', 'danger')
+                return redirect(url_for('admin.login'))
+
             # Autenticar usuario y redireccioinar a la Administracion
             login_user(user)
             # CARGAR PERMISOS EN SESION.
@@ -84,16 +89,18 @@ def registrar_usuario():
 
 
 @admin_bp.route('/usuarios/listar/', methods=['GET', 'POST'])
+@admin_bp.route('/usuarios/listar/<int:page>', methods=['GET', 'POST'])
 @login_required
-def listar_usuarios():
+def listar_usuarios(page=1):
     """
         READ
         Vista de modulo CRUD usuarios en administracion.
         ID 6 USER_INDEX permisos
     """
+    usuarios_por_pag = Config.query.first().n_elements
     id_usuario = current_user.get_id()
     if User.tiene_permiso(id_usuario, 6):
-        users = User.query.all()
+        users = User.query.paginate(page, per_page=usuarios_por_pag)
         return render_template('admin/usuarios.html', users=users)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
@@ -101,16 +108,19 @@ def listar_usuarios():
 
 
 @admin_bp.route('/usuarios/activos')
+@admin_bp.route('/usuarios/activos/<int:page>')
 @login_required
-def usuarios_activos():
+def usuarios_activos(page=1):
     """
         READ
         Devuelve una lista de los usuarios activos
         ID 6 USER_INDEX permisos
     """
+    usuarios_por_pag = Config.query.first().n_elements
     id_usuario = current_user.get_id()
     if User.tiene_permiso(id_usuario, 6):
-        users = User.query.filter_by(active=True)
+        users = User.query.filter_by(active=True).paginate(
+            page, per_page=usuarios_por_pag)
         return render_template('admin/usuarios.html', users=users)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
@@ -118,16 +128,19 @@ def usuarios_activos():
 
 
 @admin_bp.route('/usuarios/bloqueados')
+@admin_bp.route('/usuarios/bloqueados/<int:page>')
 @login_required
-def usuarios_bloqueados():
+def usuarios_bloqueados(page=1):
     """
         READ
         Devuelve una lista de los usuarios bloqueados
         ID 6 USER_INDEX permisos
     """
+    usuarios_por_pag = Config.query.first().n_elements
     id_usuario = current_user.get_id()
     if User.tiene_permiso(id_usuario, 6):
-        users = User.query.filter_by(active=False)
+        users = User.query.filter_by(active=False).paginate(
+            page, per_page=usuarios_por_pag)
         return render_template('admin/usuarios.html', users=users)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
@@ -135,17 +148,20 @@ def usuarios_bloqueados():
 
 
 @admin_bp.route('/usuarios/buscar/', methods=['GET', 'POST'])
+@admin_bp.route('/usuarios/buscar/<int:page>', methods=['GET', 'POST'])
 @login_required
-def buscar_por_nombre():
+def buscar_por_nombre(page=1):
     """
         READ
         Devuelve una lista de usuarios con nombre enviado como parametro
         ID 6 USER_INDEX permisos
     """
-    nombre = request.form.get('buscar-nombre')
+    usuarios_por_pag = Config.query.first().n_elements
+    search = request.form.get('buscar-nombre')
     id_usuario = current_user.get_id()
     if User.tiene_permiso(id_usuario, 6):
-        users = User.query.filter_by(first_name=nombre)
+        users = User.query.filter(or_(User.first_name.contains(
+            search), User.last_name.contains(search))).paginate(page, per_page=usuarios_por_pag)
         return render_template('admin/usuarios.html', users=users)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')

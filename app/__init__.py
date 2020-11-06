@@ -8,7 +8,6 @@ from .extensions import login_manager
 from app.admin.resources.views import admin_bp as admin_blueprint
 from app.admin.helpers import handler
 
-
 def create_app(environment="development"):
     # Configuración inicial de la app
     app = Flask(__name__)
@@ -18,6 +17,12 @@ def create_app(environment="development"):
     login_manager.login_message = "Debes estar autenticado para ver esta pagina."
     login_manager.login_message_category = "danger"
     login_manager.login_view = "admin.login"
+
+    # Configuracion file_upload
+    app.config["UPLOAD_FOLDER"] = '/static/uploads'
+    app.config["ALLOWED_EXTENSIONS"] = ["pdf"]
+    app.config["MAX_CONTENT_LENGTH"] = 1000 * 1024  # 1mb
+
 
     # Carga de la configuración
     env = environ.get("FLASK_ENV", environment)

@@ -1,0 +1,177 @@
+{% extends "admin/layout.html" %}
+{% block title %}Centros Ayuda GBA - Administracion - Listado de Centros de Ayuda{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block navbar %}
+
+{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Centros de Ayuda</li>
+    </ol>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col d-flex justify-content-center p-2">
+            <div class="search-box d-inline-flex">
+                <form action="{{ url_for('admin.centros_buscar_nombre') }}" method="GET">
+                    <div class="input-group mb-3">
+                        {% if search %}
+                        <input type="search" class="form-control" name="buscar-nombre" placeholder="{{search}}"
+                            aria-label="buscar por nombre" aria-describedby="buscar-boton">
+                        {% else %}
+                        <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..."
+                            aria-label="buscar por nombre" aria-describedby="buscar-boton">
+                        {% endif %}
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="submit" id="buscar-boton">Ok</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col d-flex justify-user-options p-2">
+            <div>
+                <a class="btn btn-outline-secondary" href="{{ url_for('admin.centros_ayuda', page=1) }}">Limpiar</a>
+            </div>
+            <div class="dropleft mr-1">
+                <a class="btn btn-secondary " href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-filter"></i>
+                </a>
+
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                    <a class="dropdown-item"
+                        href="{{ url_for('admin.centros_filtrar_estado', status=1) }}">Aceptados</a>
+                    <a class="dropdown-item"
+                        href="{{ url_for('admin.centros_filtrar_estado', status=2) }}">Pendientes</a>
+                    <a class="dropdown-item"
+                        href="{{ url_for('admin.centros_filtrar_estado', status=3) }}">Rechazados</a>
+                </div>
+            </div>
+            <div>
+                <a class="btn-success btn" href="{{ url_for('admin.crear_centro') }}"><i class="fas fa-user-plus"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover table-light table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Dirección</th>
+                    <th scope="col">Municipio</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if not centros.items %}
+                <div class="alert alert-warning" role="alert">
+                    No se encontraron resultados.
+                </div>
+                {% else %}
+
+                {% for centro in centros.items %}
+                {% if centro.status_id == 1 %}
+                <tr id="{{ centro.id }}">
+                    {% elif centro.status_id == 2 %}
+                <tr class="table-primary" id="{{ centro.id }}">
+                    {% else %}
+                <tr class="table-danger" id="{{ centro.id }}">
+                    {% endif %}
+                    <th scope="row">
+                        <span class="badge badge-dark">{{ centro.status }}</span><br>
+                    </th>
+                    <td>{{ centro.name_center }}</td>
+                    <td>{{ centro.address }}</td>
+                    <td>{{ user.town }}</td>
+                    <td>
+                        <a href="{{ url_for('admin.actualizar_centro', id=centro.id) }}"><i
+                                class="fas fa-edit text-success" title="Editar"></i></a>
+                        <a><i class="fas fa-trash-alt text-danger" title="Eliminar" data-toggle="modal"
+                                data-target="#{{ centro.name_center }}-{{ centro.id }}-modal"></i></a>
+                        <div id="{{ centro.name_center }}-{{ centro.id }}-modal" class="modal fade bd-example-modal-sm" tabindex="-1"
+                            role="dialog" aria-labelledby="{{ centro.name_center }}-modal-title" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="{{ centro.id }}-modal-title">Eliminar centro de ayuda
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        ¿Estás seguro que deseas eliminar el centro de ayuda <b>{{ centro.name_center }}</b>?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
+                                            aria-label="Cancelar">Cancelar</button>
+                                        <a class="btn btn-danger"
+                                            href="{{ url_for('admin.eliminar_centro', id=centro.id) }}"
+                                            aria-label="Borrar">Borrar</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                {% endfor %}
+            </tbody>
+            {% endif %}
+        </table>
+    </div>
+    <nav aria-label="Paginas de centros de ayuda">
+        <ul class="pagination pagination-sm justify-content-center">
+            {% if centros.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin.centros_ayuda', page=centros.prev_num) }}" tabindex="-1"
+                    aria-disabled="true">Anterior</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+            </li>
+
+            {% endif %}
+
+            <!-- all page numbers -->
+            {% for page_num in centros.iter_pages() %}
+            {% if page_num %}
+            {% if page_num != centros.page %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin.centros_ayuda', page=page_num) }}">{{ page_num }}</a>
+            </li>
+            {% else %}
+            <li class="page-item active">
+                <a class="page-link" href="#">{{ page_num }}</a>
+            </li>
+            {% endif %}
+            {% else %}
+            <li class="page-item">
+                <span class="ellipsis" style="white-space; nowrap; overflow: hidden; text-overflow: ellipsis">…</span>
+            </li>
+            {% endif %}
+            {% endfor %}
+            <!-- next page -->
+            {% if centros.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin.centros_ayuda', page=centros.next_num) }}">Siguiente</a>
+            </li>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#">Siguiente</a></li>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+
+{% endblock %}

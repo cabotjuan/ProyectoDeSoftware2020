@@ -1,12 +1,12 @@
-from flask import flash, redirect, session, render_template, url_for, Blueprint, request
-from app.models.model import User, Role, Permission, users_roles, Config
+from flask import flash, redirect, session, render_template, url_for, Blueprint, request, jsonify, make_response
+from app.models.model import User , Role, Permission, users_roles, Config
 from app.extensions import db
 from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm, EditForm
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy import or_
+import requests
 # Blueprint Administracion
 admin_bp = Blueprint('admin', __name__)
-
 
 @admin_bp.route('/')
 @login_required
@@ -16,6 +16,7 @@ def index():
     """
     return render_template('admin/index.html')
 
+# AUTH ROUTES #
 
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -50,6 +51,8 @@ def logout():
     logout_user()
     return redirect(url_for('admin.login'))
 
+
+# USER ROUTES #
 
 @admin_bp.route('/usuarios/registrar/', methods=['GET', 'POST'])
 @login_required
@@ -302,3 +305,120 @@ def eliminar_usuario(id):
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
         return redirect(url_for('admin.index'))
+
+
+# CRUD CENTROS DE AYUDA #
+
+
+@admin_bp.route('listado_centros', methods=['GET', 'POST'])
+@login_required
+def centros_ayuda():
+    return render_template('admin/centros_ayuda.html')
+
+
+@admin_bp.route('listado_centros/', methods=['GET'])
+@login_required
+def centros_buscar_nombre():
+    search = request.args.get('buscar-nombre')
+    return render_template('admin/centros_ayuda.html',search=search)
+
+
+@admin_bp.route('listado_centros/status=<status>', methods=['GET', 'POST'])
+@login_required
+def centros_filtrar_estado(status):
+    return render_template('admin/centros_ayuda.html')
+
+
+@admin_bp.route('centro/<id>', methods=['GET', 'POST'])
+@login_required
+def ver_centro(id):
+    return render_template('admin/centro.html')
+
+
+@admin_bp.route('centro/crear', methods=['GET', 'POST'])
+@login_required
+def crear_centro():
+    return render_template('admin/centro_edit.html')
+
+
+@admin_bp.route('centro/actualizar/<id>', methods=['GET', 'POST'])
+@login_required
+def actualizar_centro(id):
+    return render_template('admin/centro_edit.html')
+
+
+@admin_bp.route('centro/eliminar/<id>', methods=['GET', 'POST'])
+@login_required
+def eliminar_centro(id):
+    return 'Borrado de Centro de ayuda'
+
+
+
+#  CRUD TURNOS #
+
+
+
+@admin_bp.route('turnos', methods=['GET', 'POST'])
+@login_required
+def turnos():
+    return render_template('admin/turnos.html')
+
+@admin_bp.route('turnos/centro=<search>', methods=['GET', 'POST'])
+@login_required
+def turnos_buscar_centro(search):
+    return render_template('admin/turnos.html')
+
+@admin_bp.route('turnos/email=<search>', methods=['GET', 'POST'])
+@login_required
+def turnos_buscar_email(search):
+    return render_template('admin/turnos.html')
+
+@admin_bp.route('centro/<id>/turnos', methods=['GET', 'POST'])
+@login_required
+def turnos_centro(id):
+    return render_template('admin/turnos.html')
+
+@admin_bp.route('centro/<id>/turnos/crear', methods=['GET', 'POST'])
+@login_required
+def crear_turno():
+    return render_template('admin/turnos_edit.html')
+
+@admin_bp.route('centro/<id>/turnos', methods=['GET', 'POST'])
+@login_required
+def actualizar_turno(id):
+    return render_template('admin/turno_edit.html')
+
+@admin_bp.route('centro/<id>/turnos', methods=['GET', 'POST'])
+@login_required
+def eliminar_turno(id):
+    return 'Borrado de Turno'
+
+
+
+#  API ROUTES #
+
+
+@admin_bp.route('/centros', methods=["GET","POST"])
+def api_centros():
+    return 'response'
+
+
+@admin_bp.route('/centros/<centro_id>', methods=["GET"])
+def api_centro(centro_id):
+    return 'response'
+
+
+@admin_bp.route('/centros/<centro_id>/turnos_disponibles/', methods=["GET"])
+def api_centro_turnos(centro_id):
+    # /../?fecha=<fecha>
+    #  SE DEBERIA USAR request.args.get('fecha')...
+    return 'response'
+
+@admin_bp.route('/centros/<centro_id>/reserva', methods=["POST"])
+def api_centro_reserva(centro_id):
+    return 'response'
+
+
+#  TESTING ROUTES #
+
+# ... # 

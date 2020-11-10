@@ -20,8 +20,13 @@
       <div class="search-box d-inline-flex">
         <form action="{{ url_for('admin.buscar_por_nombre') }}" method="POST">
           <div class="input-group mb-3">
+            {% if search %}
             <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..."
-              aria-label="buscar por nombre" aria-describedby="buscar-boton">
+              aria-label="buscar por nombre" aria-describedby="buscar-boton" value="{{search}}">
+              {% else %}
+              <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..."
+                aria-label="buscar por nombre" aria-describedby="buscar-boton">
+              {% endif %}
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="submit" id="buscar-boton">Ok</button>
             </div>
@@ -145,7 +150,7 @@
       <!-- all page numbers -->
       {% for page_num in users.iter_pages() %}
       {% if page_num %}
-      {% if page_num != users.page %}
+     {% if page_num != users.page %}
       <li class="page-item">
         <a class="page-link" href="{{ url_for('admin.listar_usuarios', page=page_num) }}">{{ page_num }}</a>
       </li>

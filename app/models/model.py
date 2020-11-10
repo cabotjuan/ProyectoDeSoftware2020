@@ -2,6 +2,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db
 from app.extensions import login_manager
+from app.extensions import ma
 
 users_roles = db.Table('users_roles', db.Column('role_id', db.Integer, db.ForeignKey(
     'roles.id'), primary_key=True), db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True))
@@ -128,25 +129,25 @@ class HelpCenter(db.Model):
     web = db.Column(db.String(80))
     email = db.Column(db.String(40))
     visit_protocol = db.Column(db.String(256))
-    status_id = db.Column(db.Integer, db.ForeignKey('statuses.id'))
+    status_id = db.Column(db.Integer, db.ForeignKey('statuses.id'), default=2)
     center_type_id = db.Column(db.Integer, db.ForeignKey('center_types.id'))
     latitude = db.Column(db.String(20), nullable=False)
     longitude = db.Column(db.String(20), nullable=False)
-    appointments = db.relationship('Appointment', back_populates='help_centers',lazy='dynamic')
+    appointments = db.relationship('Appointment', backref='help_centers',lazy='dynamic')
 
 class Status(db.Model):
     __tablename__ ='statuses'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     name_status = db.Column(db.String(20), nullable=False)
-    help_centers = db.relationship('HelpCenter', back_populates='statuses',lazy='dynamic')
+    help_centers = db.relationship('HelpCenter', backref='statuses',lazy='dynamic')
 
 class CenterType(db.Model):
     __tablename__ ='center_types'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     name_center_type = db.Column(db.String(30), nullable=False)
-    help_centers = db.relationship('HelpCenter', back_populates='center_types',lazy='dynamic')
+    help_centers = db.relationship('HelpCenter', backref='center_types',lazy='dynamic')
 
 class Appointment(db.Model):
     __tablename__ ='appointments'
@@ -157,3 +158,24 @@ class Appointment(db.Model):
     end_time = db.Column(db.Time(), nullable=False)
     appointment_date = db.Column(db.Date(), nullable=False)
     center_id = db.Column(db.Integer, db.ForeignKey('help_centers.id'))
+
+
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+
+class HelpCenterSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = HelpCenter
+
+class CenterTypeSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = CenterType
+
+class StatusSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Status
+
+class AppointmentSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Appointment

@@ -4,6 +4,7 @@ from flask_session import Session
 from flask_migrate import Migrate
 from config import config
 from .extensions import db
+from .extensions import ma
 from .extensions import login_manager
 from app.admin.resources.views import admin_bp as admin_blueprint
 from app.admin.helpers import handler
@@ -39,7 +40,7 @@ def create_app(environment="development"):
         conf["DB_HOST"]+"/"+conf["DB_NAME"]
 
     db.init_app(app)
-
+    ma.init_app(app)
     # Handlers
     app.register_error_handler(404, handler.not_found_error)
     app.register_error_handler(401, handler.unauthorized_error)

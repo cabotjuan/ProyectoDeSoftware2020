@@ -18,13 +18,13 @@
     <div class="row">
         <div class="col d-flex justify-content-center p-2">
             <div class="search-box d-inline-flex">
-                <form action="{{ url_for('admin.centros_buscar_nombre') }}" method="GET">
+                <form action="{{ url_for('admin.centros_buscar_nombre') }}" method="POST">
                     <div class="input-group mb-3">
                         {% if search %}
-                        <input type="search" class="form-control" name="buscar-nombre" placeholder="{{search}}"
-                            aria-label="buscar por nombre" aria-describedby="buscar-boton">
+                        <input type="search" class="form-control" name="buscar-centro" placeholder="Buscar nombre..."
+                            aria-label="buscar por nombre" aria-describedby="buscar-boton" value="{{search}}">
                         {% else %}
-                        <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..."
+                        <input type="search" class="form-control" name="buscar-centro" placeholder="Buscar nombre..."
                             aria-label="buscar por nombre" aria-describedby="buscar-boton">
                         {% endif %}
                         <div class="input-group-append">
@@ -54,7 +54,7 @@
                 </div>
             </div>
             <div>
-                <a class="btn-success btn" href="{{ url_for('admin.crear_centro') }}"><i class="fas fa-user-plus"></i>
+                <a class="btn-success btn" href="{{ url_for('admin.crear_centro') }}"><i class="fas fa-plus"></i>
                 </a>
             </div>
         </div>
@@ -63,6 +63,7 @@
         <table class="table table-sm table-hover table-light table-striped">
             <thead>
                 <tr>
+                    <th scope="col">Estado</th>
                     <th scope="col">Nombre</th>
                     <th scope="col">Dirección</th>
                     <th scope="col">Municipio</th>
@@ -78,36 +79,45 @@
 
                 {% for centro in centros.items %}
                 {% if centro.status_id == 1 %}
-                <tr id="{{ centro.id }}">
+                <tr class="table-success" id="{{ centro.id }}">
+                    <th scope="row">
+                        <span class="badge badge-success">{{ centro.statuses.name_status}}</span><br>
+                    </th>
                     {% elif centro.status_id == 2 %}
                 <tr class="table-primary" id="{{ centro.id }}">
+                    <th scope="row">
+                        <span class="badge badge-primary">{{ centro.statuses.name_status}}</span><br>
+                    </th>
                     {% else %}
                 <tr class="table-danger" id="{{ centro.id }}">
-                    {% endif %}
                     <th scope="row">
-                        <span class="badge badge-dark">{{ centro.status }}</span><br>
+                        <span class="badge badge-danger">{{ centro.statuses.name_status}}</span><br>
                     </th>
+                    {% endif %}
                     <td>{{ centro.name_center }}</td>
                     <td>{{ centro.address }}</td>
-                    <td>{{ user.town }}</td>
+                    <td>{{ centro.town }}</td>
                     <td>
                         <a href="{{ url_for('admin.actualizar_centro', id=centro.id) }}"><i
                                 class="fas fa-edit text-success" title="Editar"></i></a>
                         <a><i class="fas fa-trash-alt text-danger" title="Eliminar" data-toggle="modal"
                                 data-target="#{{ centro.name_center }}-{{ centro.id }}-modal"></i></a>
-                        <div id="{{ centro.name_center }}-{{ centro.id }}-modal" class="modal fade bd-example-modal-sm" tabindex="-1"
-                            role="dialog" aria-labelledby="{{ centro.name_center }}-modal-title" aria-hidden="true">
+                        <div id="{{ centro.name_center }}-{{ centro.id }}-modal" class="modal fade bd-example-modal-sm"
+                            tabindex="-1" role="dialog" aria-labelledby="{{ centro.name_center }}-modal-title"
+                            aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="{{ centro.id }}-modal-title">Eliminar centro de ayuda
+                                        <h5 class="modal-title" id="{{ centro.id }}-modal-title">Eliminar centro de
+                                            ayuda
                                         </h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        ¿Estás seguro que deseas eliminar el centro de ayuda <b>{{ centro.name_center }}</b>?
+                                        ¿Estás seguro que deseas eliminar el centro de ayuda
+                                        <b>{{ centro.name_center }}</b>?
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"

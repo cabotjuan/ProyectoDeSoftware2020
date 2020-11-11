@@ -10,15 +10,6 @@ import decimal
 import datetime
 import json
 
-
-def alchemyencoder(obj):
-    """JSON encoder function for SQLAlchemy special classes."""
-    if isinstance(obj, datetime.date):
-        return obj.isoformat()
-    elif isinstance(obj, decimal.Decimal):
-        return float(obj)
-
-
 # Blueprint Administracion
 admin_bp = Blueprint('admin', __name__)
 

@@ -483,12 +483,12 @@ def api_centros():
 
         # Obtener todos los Centros de Ayuda #
 
-        users = HelpCenter.query.all()
+        centers = HelpCenter.query.all()
         
         # Serializar a JSON los Centros de Ayuda #
 
         help_center_schema = HelpCenterSchema(many=True)
-        output = help_center_schema.dump(users)
+        output = help_center_schema.dump(centers)
         
         # Crear una respuesta HTTP 200 OK con el JSON de Centros de Ayuda #
         

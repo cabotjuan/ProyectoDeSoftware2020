@@ -4,17 +4,25 @@
 {% block content %}
 
 <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
+    <ol class="breadcrumb mb-0 shadow-color-4">
         <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
         <li class="breadcrumb-item active" aria-current="page">
-            Configuracion de sistema
+            Configuración de sistema
         </li>
     </ol>
 </nav>
 
 <form method="post" novalidate>
     <div class="container-fluid">
-        <div class="row d-flex justify-content-center">
+        <div class="row p-4 bg-color-3 text-white">
+            <div class="col-md d-inline-flex flex-row align-items-center justify-content-start">
+                <div class="logo-centros">
+                    <img src="/static/img/Settings.png" class="card-img-top w-75" alt="configuracion">
+                </div>
+                <h1 class="text-center font-weight-light"> Configuración</h1>
+            </div>
+        </div>
+        <div class="row mt-4 d-flex justify-content-center">
             <div class="col-md-4 align-self-center">
                 {{ form.hidden_tag() }}
                 <div>

@@ -1,0 +1,59 @@
+{% extends "admin/layout.html" %}
+{% block title %}Centros Ayuda GBA - Administracion - Nuevo Turno{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block navbar %}
+
+{% endblock %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="/static/mark-your-calendar.css">
+<script type="text/javascript" src="/static/mark-your-calendar.js"></script>
+<meta id="horarios" data-horarios="{{ horarios | safe }}">
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.centros_ayuda') }}">Centros de Ayuda</a></li>
+        <li class="breadcrumb-item active" aria-current="page">
+            Turno
+        </li>
+    </ol>
+</nav>
+<div class="container-fluid">
+    <div class="row p-4 bg-color-3 text-white">
+        <div class="col-md-2 d-flex flex-column align-items-start">
+            <div class="logo-centros">
+                <img src="/static/img/turnos.png" class="card-img-top" alt="configuracion">
+            </div>
+        </div>
+        <div class="col-md d-flex flex-column align-items-start justify-content-center">
+            <h1 class="text-center font-weight-light">Reservar turno</h1>
+        </div>
+    </div>
+    <div id="picker"></div>
+    <p>Fecha Seleccionada: <span id="selected-date"></span></p>
+    <p>Hora Seleccionada: <span id="selected-time"></span></p>
+    <button class="btn-success">Confirmar Turno</button>
+    
+</div>
+
+
+<script type="text/javascript">
+     (function ($) {
+        $('#picker').markyourcalendar({
+            availability: {{ horarios | safe }},
+            weekdays: ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'],
+            onClick: function (ev, data) {
+                // data is a list of datetimes
+                $.each(data, function () {
+                    var d = this.split(' ')[0];
+                    var t = this.split(' ')[1];
+                    $('#selected-date').html(d);
+                    $('#selected-time').html(t);
+                });
+            }
+        });
+    })(jQuery);
+</script>
+
+{% endblock %}

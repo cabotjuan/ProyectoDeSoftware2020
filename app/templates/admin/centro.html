@@ -1,0 +1,106 @@
+{% extends "admin/layout.html" %}
+{% block title %}Centros Ayuda GBA - Administracion - {{centro.name_center}} {% endblock %}
+
+{% block content %}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.centros_ayuda') }}">Centros de Ayuda</a></li>
+        <li class="breadcrumb-item active" aria-current="page">
+            {{centro.name_center}}
+        </li>
+    </ol>
+</nav>
+<div class="container-fluid">
+    <div class="row p-4 bg-color-3 text-white">
+        <div class="col-md-2 d-flex flex-column align-items-center">
+            <div class="logo-centros">
+                <img src="../../static/img/Center3.png" class="card-img-top" alt="configuracion">
+            </div>
+        </div>
+        <div class="col-md d-flex flex-column align-items-start">
+            <h1 class="text-center">{{centro.name_center}}</h1>
+            <h3 class="text-center font-weight-light">{{centro.town}}</h3>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-8 d-flex flex-column align-content-center justify-content-center">
+            <div class="row">
+                <div class="col d-flex flex-column">
+                    <table class="table  table-striped table-secondary">
+                        <tbody>
+                            <tr>
+                                <td><b>Dirección: </b>{{centro.address}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Teléfono : </b>{{centro.phone}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Horario:</b> {{centro.opening_time}} a {{centro.close_time}}hs </td>
+                            </tr>
+                            <tr>
+                                <td><b>Sitio Web: </b> {{centro.web}}{% if not centro.web %} <i> No Disponible
+                                    </i>{% endif %} </td>
+                            </tr>
+                            <tr>
+                                <td><b>Email: </b> {{centro.email}} {% if not centro.email %} <i> No Disponible
+                                    </i>{% endif %}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Protocolo de Visita: </b> {{centro.visit_protocol}}
+                                    {% if not centro.visit_protocol %} <i> No Disponible </i>{% endif %} </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 d-flex flex-column align-content-center justify-content-center">
+            <div class="row">
+                <div class="col ">
+                    <a href="{{ url_for('admin.turnos_centro', id=centro.id) }}"
+                        class="btn btn-primary btn-lg btn-block"><i class="far fa-calendar-alt"></i> Ver Turnos</a>
+                    <a href="{{ url_for('admin.crear_turno', id=centro.id) }}"
+                        class="btn btn-primary btn-lg btn-block"><i class="far fa-calendar-alt"></i> <i
+                            class="fas fa-plus"></i> Nuevo Turno</a>
+
+                    <a href="{{ url_for('admin.actualizar_centro', id=centro.id) }}"
+                        class="btn btn-success btn-lg btn-block"><i class="fas fa-edit" title="Editar"></i> Editar</a>
+                    <button type="button" class="btn btn-danger btn-lg btn-block" data-toggle="modal"
+                        data-target="#centro-modal">
+                        <i class="fas fa-trash-alt"></i> Eliminar
+                    </button>
+
+                    <!-- Delete Modal -->
+                    <div class="modal fade" id="centro-modal" tabindex="-1" role="dialog"
+                        aria-labelledby="centro-modal-title" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="centro-modal-title">Eliminar Centro de Ayuda</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    ¿Estás seguro que deseas eliminar el centro de ayuda
+                                    <b>{{ centro.name_center }}</b>?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
+                                        aria-label="Cancelar">Cancelar</button>
+                                    <a class="btn btn-danger"
+                                        href="{{ url_for('admin.eliminar_centro', id=centro.id) }}"
+                                        aria-label="Borrar">Borrar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

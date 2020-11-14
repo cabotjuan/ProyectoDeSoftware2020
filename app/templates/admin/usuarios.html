@@ -8,27 +8,35 @@
 {% endblock %}
 {% block content %}
 <nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
+  <ol class="breadcrumb mb-0 shadow-color-4">
     <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
     <li class="breadcrumb-item active" aria-current="page">Usuarios</li>
   </ol>
 </nav>
 
 <div class="container-fluid">
-  <div class="row">
-    <div class="col d-flex justify-content-center p-2">
+  <div class="row p-4 bg-color-3 text-white">
+    <div class="col-md d-inline-flex flex-row align-items-center justify-content-start">
+      <div class="logo-centros">
+        <img src="/static/img/Users.png" class="card-img-top w-75" alt="configuracion">
+      </div>
+      <h1 class="text-center font-weight-light"> Usuarios</h1>
+    </div>
+  </div>
+  <div class="row bg-color-1 shadow-color-3">
+    <div class="col d-flex justify-content-start align-items-center p-2">
       <div class="search-box d-inline-flex">
         <form action="{{ url_for('admin.buscar_por_nombre') }}" method="POST">
           <div class="input-group mb-3">
             {% if search %}
             <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..."
               aria-label="buscar por nombre" aria-describedby="buscar-boton" value="{{search}}">
-              {% else %}
-              <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..."
-                aria-label="buscar por nombre" aria-describedby="buscar-boton">
-              {% endif %}
+            {% else %}
+            <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..."
+              aria-label="buscar por nombre" aria-describedby="buscar-boton">
+            {% endif %}
             <div class="input-group-append">
-              <button class="btn btn-outline-secondary" type="submit" id="buscar-boton">Ok</button>
+              <button class="btn btn-secondary" type="submit" id="buscar-boton"><i class="fas fa-search"></i></button>
             </div>
           </div>
 
@@ -36,13 +44,10 @@
       </div>
     </div>
     <div class="col d-flex justify-user-options p-2">
-      <div>
-        <a class="btn btn-outline-secondary" href="{{ url_for('admin.listar_usuarios', page=1) }}">Limpiar</a>
-      </div>
       <div class="dropleft mr-1">
         <a class="btn btn-secondary " href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
           aria-haspopup="true" aria-expanded="false">
-          <i class="fas fa-filter"></i>
+          Estado <i class="fas fa-filter"></i>
         </a>
 
         <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
@@ -56,127 +61,134 @@
       </div>
     </div>
   </div>
-  <div class="table-responsive">
-    <table class="table table-sm table-hover table-light table-striped">
-      <thead>
-        <tr>
-          <th scope="col">Rol</th>
-          <th scope="col">Email</th>
-          <th scope="col">Nombre</th>
-          <th scope="col">Apellido</th>
-          <th scope="col"></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% if not users.items %}
-        <div class="alert alert-warning" role="alert">
-          No se encontraron resultados.
-        </div>
-        {% else %}
+  <div class="row">
 
-        {% for user in users.items %}
-        {% if user.active %}
-        <tr id="{{ user.username }}">
+    <div class="table-responsive">
+      <table class="table table-sm table-hover table-light table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Rol</th>
+            <th scope="col">Email</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Apellido</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if not users.items %}
+          <div class="alert alert-warning" role="alert">
+            No se encontraron resultados.
+          </div>
           {% else %}
-        <tr class="table-warning" id="{{ user.username }}">
-          {% endif %}
-          <th scope="row">
-            {% for role in user.roles %}
-            {% if role.id == 1 %}
-            <span class="badge badge-dark">{{ role.description }}</span><br>
+
+          {% for user in users.items %}
+          {% if user.active %}
+          <tr id="{{ user.username }}">
             {% else %}
-            <span class="badge badge-secondary">{{ role.description }}</span><br>
+          <tr class="table-warning" id="{{ user.username }}">
             {% endif %}
-            {% endfor %} </th>
-          <td>{{ user.email }}</td>
-          <td>{{ user.first_name }}</td>
-          <td>{{ user.last_name }}</td>
-          <td>
-            <a href="{{ url_for('admin.actualizar_usuario', id_user=user.id) }}"><i
-                class="fas fa-user-edit text-success" title="Editar"></i></a>
-            {% if user.active %}
-            <a href="{{ url_for('admin.activar_bloquear', id=user.id) }}"><i class="fas fa-user-slash text-secondary"
-                title="Deshabilitar"></i></a>
-            {% else %}
-            <a href="{{ url_for('admin.activar_bloquear', id=user.id) }}"><i class="fas fa-user-slash text-warning"
-                title="Habilitar"></i></a>
-            {% endif %}
-            <a><i class="fas fa-trash-alt text-danger" title="Eliminar" data-toggle="modal"
-                data-target="#{{ user.username}}-modal"></i></a>
-            <div id="{{ user.username }}-modal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog"
-              aria-labelledby="{{ user.username }}-modal-title" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="{{ user.username }}-modal-title">Eliminar usuario</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
-                    ¿Estás seguro que deseas eliminar el usuario <b>{{ user.username }}</b>?
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
-                      aria-label="Cancelar">Cancelar</button>
-                    <a class="btn btn-danger" href="{{ url_for('admin.eliminar_usuario', id=user.id) }}"
-                      aria-label="Borrar">Borrar</a>
+            <th scope="row">
+              {% for role in user.roles %}
+              {% if role.id == 1 %}
+              <span class="badge badge-dark">{{ role.description }}</span><br>
+              {% else %}
+              <span class="badge badge-secondary">{{ role.description }}</span><br>
+              {% endif %}
+              {% endfor %} </th>
+            <td>{{ user.email }}</td>
+            <td>{{ user.first_name }}</td>
+            <td>{{ user.last_name }}</td>
+            <td>
+              <a href="{{ url_for('admin.actualizar_usuario', id_user=user.id) }}"><i
+                  class="fas fa-user-edit text-success" title="Editar"></i></a>
+              {% if user.active %}
+              <a href="{{ url_for('admin.activar_bloquear', id=user.id) }}"><i class="fas fa-user-slash text-secondary"
+                  title="Deshabilitar"></i></a>
+              {% else %}
+              <a href="{{ url_for('admin.activar_bloquear', id=user.id) }}"><i class="fas fa-user-slash text-warning"
+                  title="Habilitar"></i></a>
+              {% endif %}
+              <a><i class="fas fa-trash-alt text-danger" title="Eliminar" data-toggle="modal"
+                  data-target="#{{ user.username}}-modal"></i></a>
+              <div id="{{ user.username }}-modal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog"
+                aria-labelledby="{{ user.username }}-modal-title" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="{{ user.username }}-modal-title">Eliminar usuario</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      ¿Estás seguro que deseas eliminar el usuario <b>{{ user.username }}</b>?
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
+                        aria-label="Cancelar">Cancelar</button>
+                      <a class="btn btn-danger" href="{{ url_for('admin.eliminar_usuario', id=user.id) }}"
+                        aria-label="Borrar">Borrar</a>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </td>
-        </tr>
+            </td>
+          </tr>
 
-        {% endfor %}
-      </tbody>
-      {% endif %}
-    </table>
+          {% endfor %}
+        </tbody>
+        {% endif %}
+      </table>
+    </div>
+    <div class="col ">
+
+      <nav aria-label="Paginas de listado de usuarios">
+        <ul class="pagination pagination-sm justify-content-center">
+          {% if users.has_prev %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.listar_usuarios', page=users.prev_num) }}" tabindex="-1"
+              aria-disabled="true">Anterior</a>
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+          </li>
+
+          {% endif %}
+
+          <!-- all page numbers -->
+          {% for page_num in users.iter_pages() %}
+          {% if page_num %}
+          {% if page_num != users.page %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.listar_usuarios', page=page_num) }}">{{ page_num }}</a>
+          </li>
+          {% else %}
+          <li class="page-item active">
+            <a class="page-link" href="#">{{ page_num }}</a>
+          </li>
+          {% endif %}
+          {% else %}
+          <li class="page-item">
+            <span class="ellipsis" style="white-space; nowrap; overflow: hidden; text-overflow: ellipsis">…</span>
+          </li>
+          {% endif %}
+          {% endfor %}
+          <!-- next page -->
+          {% if users.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.listar_usuarios', page=users.next_num) }}">Siguiente</a></li>
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <a class="page-link" href="#">Siguiente</a></li>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+
+    </div>
   </div>
-  <nav aria-label="Paginas de listado de usuarios">
-    <ul class="pagination pagination-sm justify-content-center">
-      {% if users.has_prev %}
-      <li class="page-item">
-        <a class="page-link" href="{{ url_for('admin.listar_usuarios', page=users.prev_num) }}" tabindex="-1"
-          aria-disabled="true">Anterior</a>
-      </li>
-      {% else %}
-      <li class="page-item disabled">
-        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
-      </li>
-
-      {% endif %}
-
-      <!-- all page numbers -->
-      {% for page_num in users.iter_pages() %}
-      {% if page_num %}
-     {% if page_num != users.page %}
-      <li class="page-item">
-        <a class="page-link" href="{{ url_for('admin.listar_usuarios', page=page_num) }}">{{ page_num }}</a>
-      </li>
-      {% else %}
-      <li class="page-item active">
-        <a class="page-link" href="#">{{ page_num }}</a>
-      </li>
-      {% endif %}
-      {% else %}
-      <li class="page-item">
-        <span class="ellipsis" style="white-space; nowrap; overflow: hidden; text-overflow: ellipsis">…</span>
-      </li>
-      {% endif %}
-      {% endfor %}
-      <!-- next page -->
-      {% if users.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="{{ url_for('admin.listar_usuarios', page=users.next_num) }}">Siguiente</a></li>
-      </li>
-      {% else %}
-      <li class="page-item disabled">
-        <a class="page-link" href="#">Siguiente</a></li>
-      </li>
-      {% endif %}
-    </ul>
-  </nav>
 </div>
 
 {% endblock %}

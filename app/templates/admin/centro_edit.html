@@ -14,15 +14,18 @@
         <li class="breadcrumb-item active" aria-current="page">Centro de ayuda</li>
     </ol>
 </nav>
+
 <select id="municipios" name="municipios">
     {% for municipio in municipios %}
     <option value="{{municipio}}">{{municipio}}</option>
     {% endfor %}
 </select>
+
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function () {
         $('#municipios').select2();
+        $('#municipios').prop('required','required')
     });
 </script>
 {% endblock %}

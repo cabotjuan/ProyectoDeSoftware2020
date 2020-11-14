@@ -1,4 +1,4 @@
-from flask import flash, redirect, session, render_template, url_for, Blueprint, request, jsonify, make_response
+from flask import flash, redirect, session, render_template, url_for, Blueprint, request, jsonify, make_response, current_app, abort
 from app.models.model import User, Role, Permission, users_roles, Config, HelpCenter, Status, CenterType, Appointment, HelpCenterSchema, CenterTypeSchema, StatusSchema, AppointmentSchema, UserSchema
 from app.extensions import db
 from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm, EditForm
@@ -20,6 +20,7 @@ def index():
     """
         Renderizar la pagina principal de la administracion.
     """
+    print(current_app.config['UPLOAD_FOLDER'])
     return render_template('admin/index.html')
 
 # AUTH ROUTES #
@@ -333,18 +334,20 @@ def centros_ayuda(page=1):
 def centros_buscar_nombre(page=1):
     search = request.form.get('buscar-centro')
     items_per_page = Config.query.first().n_elements
-    centros = HelpCenter.query.paginate(page, per_page=items_per_page)
+    centros = HelpCenter.query.filter(HelpCenter.name_center.contains(
+        search)).paginate(page, per_page=items_per_page)
     return render_template('admin/centros.html', centros=centros, search=search)
 
 
-@admin_bp.route('listado_centros/status=<status>/', methods=['GET', 'POST'])
-@admin_bp.route('listado_centros/status=<status>/<int:page>', methods=['GET', 'POST'])
+@admin_bp.route('listado_centros/filtrar/', methods=['GET', 'POST'])
+@admin_bp.route('listado_centros/filtrar/<int:page>', methods=['GET', 'POST'])
 @login_required
-def centros_filtrar_estado(status, page=1):
-
-    # IMPLEMENTAR
-
-    return render_template('admin/centros.html')
+def centros_filtrar_estado(page=1):
+    items_per_page = Config.query.first().n_elements
+    status = request.args.get('status')
+    centros = HelpCenter.query.filter_by(
+        status_id=status).paginate(page, per_page=items_per_page)
+    return render_template('admin/centros.html', centros=centros)
 
 
 @admin_bp.route('centro/<id>', methods=['GET', 'POST'])
@@ -352,15 +355,13 @@ def centros_filtrar_estado(status, page=1):
 def ver_centro(id):
 
     # IMPLEMENTAR
-
-    return render_template('admin/centro.html')
+    centro = HelpCenter.query.filter_by(id=id).first()
+    return render_template('admin/centro.html', centro=centro)
 
 
 @admin_bp.route('centro/crear', methods=['GET', 'POST'])
 @login_required
 def crear_centro():
-
-    # IMPLEMENTAR
     results = []
     response = requests.get(
         'https://api-referencias.proyecto2020.linti.unlp.edu.ar/municipios').json()
@@ -376,7 +377,9 @@ def crear_centro():
         for v in municipios.values():
             results.append((v['name']))
 
-    return render_template('admin/centro_edit.html', municipios=sorted(results))
+    lista_municipios = sorted(results)
+
+    return render_template('admin/centro_edit.html', municipios=lista_municipios)
 
 
 @ admin_bp.route('centro/actualizar/<id>', methods=['GET', 'POST'])
@@ -404,46 +407,123 @@ def eliminar_centro(id):
 @ admin_bp.route('turnos/<int:page>', methods=['GET', 'POST'])
 @ login_required
 def turnos(page=1):
+    """
+        READ
+        Listar Todos los turnos reservados de los proximos tres dias.
+        ID 1 CENTRO_INDEX permisos
+    """
+    usuarios_por_pag = Config.query.first().n_elements
+    id_usuario = current_user.get_id()
 
-    # IMPLEMENTAR
+    if User.tiene_permiso(id_usuario, 1):
+        fecha_hoy = datetime.datetime.today().strftime('%Y-%m-%d')
+        fecha_man = (datetime.datetime.today() +
+                    datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+        fecha_pas = (datetime.datetime.today() +
+                    datetime.timedelta(days=2)).strftime('%Y-%m-%d')
 
-    return render_template('admin/turnos.html')
+        turnos_hoy = Appointment.query.filter_by(appointment_date=fecha_hoy)
+        turnos_man = Appointment.query.filter_by(appointment_date=fecha_man)
+        turnos_pas = Appointment.query.filter_by(appointment_date=fecha_pas)
+        turnos = turnos_hoy.union(turnos_man, turnos_pas)
+
+        turnos = turnos.paginate(
+            page, per_page=usuarios_por_pag)
+        return render_template('admin/turnos.html', turnos=turnos)
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
 
-@ admin_bp.route('turnos/centro=<search>', methods=['GET', 'POST'])
+@ admin_bp.route('turnos/buscar', methods=['GET', 'POST'])
+@ admin_bp.route('turnos/<int:page>/buscar/', methods=['GET', 'POST'])
 @ login_required
-def turnos_buscar_centro(search):
+def turnos_buscar(page=1):
+    search_name = request.form.get('buscar-nombre')
+    search_date = request.form.get('buscar-fecha')
+    id_usuario = current_user.get_id()
+    usuarios_por_pag = Config.query.first().n_elements
+    if User.tiene_permiso(id_usuario, 1):
+        if search_name:
+            results = HelpCenter.query.filter(
+                HelpCenter.name_center.contains(search_name)).with_entities(HelpCenter.id)
 
-    # IMPLEMENTAR
+            help_centers_ids = [value for value, in results]
+            turnos = Appointment.query.filter(
+                Appointment.center_id.in_(help_centers_ids))
+            if search_date:
+                turnos = turnos.filter_by(
+                    appointment_date=search_date)
+        else:
+            if search_date:
+                turnos = Appointment.query.filter_by(
+                    appointment_date=search_date)
+            else:
+                turnos = Appointment.query
 
-    return render_template('admin/turnos.html')
+        turnos = turnos.paginate(page, per_page=usuarios_por_pag)
+        return render_template('admin/turnos.html', turnos=turnos, search_name=search_name, search_date=search_date)
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
-
-@ admin_bp.route('turnos/email=<search>', methods=['GET', 'POST'])
+@ admin_bp.route('turnos/buscar/centro/<id>', methods=['GET', 'POST'])
+@ admin_bp.route('turnos/buscar/centro/<id>/<int:page>', methods=['GET', 'POST'])
 @ login_required
-def turnos_buscar_email(search):
-
-    # IMPLEMENTAR
-
-    return render_template('admin/turnos.html')
+def turnos_centro_buscar(id,page=1):
+    search_date = request.form.get('buscar-fecha')
+    id_usuario = current_user.get_id()
+    usuarios_por_pag = Config.query.first().n_elements
+    centro = HelpCenter.query.filter_by(id=id).first()
+    if User.tiene_permiso(id_usuario, 1):
+        turnos = Appointment.query.filter_by(center_id=centro.id)
+        if search_date:
+            turnos=turnos.filter_by(
+                appointment_date=search_date)
+        turnos = turnos.paginate(page, per_page=usuarios_por_pag)
+        return render_template('admin/turnos.html', turnos=turnos, search_date=search_date, centro=centro)
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
 
 @ admin_bp.route('centro/<id>/turnos', methods=['GET', 'POST'])
 @ login_required
-def turnos_centro(id):
+def turnos_centro(id,page=1):
+    id_usuario = current_user.get_id()
+    usuarios_por_pag = Config.query.first().n_elements
+    centro = HelpCenter.query.filter_by(id=id).first()
+    if User.tiene_permiso(id_usuario, 1):
+        turnos = Appointment.query.filter_by(center_id = centro.id).paginate(page, per_page=usuarios_por_pag)
+        return render_template('admin/turnos.html', turnos=turnos, centro=centro)
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
-    # IMPLEMENTAR
 
-    return render_template('admin/turnos.html')
-
-
-@ admin_bp.route('centro/<id>/turnos/crear', methods=['GET', 'POST'])
+@ admin_bp.route('centro/crear_turno', methods=['GET', 'POST'])
+@ admin_bp.route('centro/<id>/crear_turno', methods=['GET', 'POST'])
 @ login_required
-def crear_turno():
+def crear_turno(id=0):
 
-    # IMPLEMENTAR
+    # Lista de Listas con Horarios Disponibles para hoy, mañana y pasado mañana .
 
-    return render_template('admin/turnos_edit.html')
+    # Consultar Qué turnos ya fueron tomados para el dia de hoy, ma;ana y pasado.
+
+    availability = [
+        ['9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00',
+            '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30'],
+        ['9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00',
+            '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30'],
+        ['9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00',
+            '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30'],
+    ]
+
+    # Recibo una fecha y un horario.
+
+    #
+
+    return render_template('admin/turno_edit.html', horarios=availability)
 
 
 @ admin_bp.route('centro/<id>/turnos', methods=['GET', 'POST'])
@@ -483,24 +563,24 @@ def api_centros():
 
         # Obtener todos los Centros de Ayuda #
 
-        users = HelpCenter.query.all()
-        
+        centers = HelpCenter.query.all()
+
         # Serializar a JSON los Centros de Ayuda #
 
         help_center_schema = HelpCenterSchema(many=True)
-        output = help_center_schema.dump(users)
-        
+        output = help_center_schema.dump(centers)
+
         # Crear una respuesta HTTP 200 OK con el JSON de Centros de Ayuda #
-        
+
         res = make_response(jsonify(output), 200, {
-            'Content-Type': 'application/json; charset=utf-8'})
+            'Content-Type': 'charset=utf-8'})
 
     elif request.method == 'POST':
 
         # Recibir un Centro de Ayuda en JSON #
 
         try:
-            
+
             # Si el request es un JSON, obtenerlo para validar los datos #
 
             data = request.get_json()
@@ -521,7 +601,7 @@ def api_centros():
                 "longitude") if k in data})
 
             # Actualiza BD con el nuevo Centro de Ayuda #
-       
+
             db.session.add(help_center)
             db.session.commit()
 
@@ -534,17 +614,39 @@ def api_centros():
             # Crea una respuesta HTTP 400 Bad Request si falla la creacion  #
 
             res = make_response(
-                jsonify({"mensaje":"No se pudo cargar el centro de ayuda."}), 400)
-    
+                jsonify({"mensaje": "No se pudo cargar el centro de ayuda."}), 400)
+
     return res
 
 
 @ admin_bp.route('/centros/<centro_id>', methods=["GET"])
 def api_centro(centro_id):
+    """
+        API endpoint: /centros/id
 
-    # IMPLEMENTAR
+        Method GET:
+            Este servicio permite obtener UN centro de ayuda identificado por parametro ID.
+            Respuestas: 200 OK
+                        404 Not Found
+                        500 Server Error
 
-    return 'response'
+    """
+
+    center = HelpCenter.query.filter_by(id=centro_id).first()
+    
+    if not center: 
+        abort(404) 
+        
+    # Serializar a JSON los Centros de Ayuda #
+
+    help_center_schema = HelpCenterSchema()
+    output = help_center_schema.dump(center)
+
+    # Crear una respuesta HTTP 200 OK con el JSON de Centros de Ayuda #
+
+    return make_response(jsonify(output), 200, {'Content-Type': 'application/json; charset=utf-8'})
+
+     
 
 
 @ admin_bp.route('/centros/<centro_id>/turnos_disponibles/', methods=["GET"])

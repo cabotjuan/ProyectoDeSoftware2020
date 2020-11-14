@@ -179,12 +179,3 @@ class StatusSchema(ma.SQLAlchemyAutoSchema):
 class AppointmentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Appointment
-
-class AvailableAppointmentsSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = Appointment
-
-    start_time = ma.auto_field()
-    end_time = ma.auto_field()
-    appointment_date = ma.auto_field()
-    center_id = ma.auto_field()

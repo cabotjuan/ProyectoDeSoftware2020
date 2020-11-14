@@ -348,20 +348,14 @@ def centros_filtrar_estado(status, page=1):
 
     return render_template('admin/centros.html')
 
-# *************************************************************************************************************
 
 @admin_bp.route('centro/<id>', methods=['GET', 'POST'])
 @login_required
 def ver_centro(id):
-    print("--------------------------------------")
-    for a in (HelpCenter.query.get(id).appointments):
-        print (a.id)
-    print("--------------------------------------")
     # IMPLEMENTAR
 
     return render_template('admin/centro.html')
 
-# *************************************************************************************************************
 
 @admin_bp.route('centro/crear', methods=['GET', 'POST'])
 @login_required
@@ -412,23 +406,12 @@ def eliminar_centro(id):
 @ login_required
 def turnos(page=1):
 
-    items_per_page = Config.query.first().n_elements
-    turnos = Appointment.query.paginate(page, per_page=items_per_page)
-    centros = HelpCenter.query.all()
-    print ("-------------{}-------------".format(centros[centros.index(HelpCenter.query.get(4))].name_center))
-    for a in centros:
-        print ("-------------{}------------------".format(a))
-    return render_template('admin/turnos.html', turnos=turnos, centros=centros)
+    return render_template('admin/turnos.html')
 
 
 @ admin_bp.route('turnos/centro=<search>', methods=['GET', 'POST'])
 @ login_required
 def turnos_buscar_centro(search):
-
-    search = request.form.get('buscar-centro')
-    items_per_page = Config.query.first().n_elements
-    centros = HelpCenter.query.paginate(page, per_page=items_per_page)
-    return render_template('admin/centros.html', centros=centros, search=search)
 
     return render_template('admin/turnos.html')
 
@@ -649,14 +632,6 @@ def api_centro(centro_id):
 @ admin_bp.route('/centros/<centro_id>/turnos_disponibles/', methods=["GET"])
 def api_centro_turnos(centro_id):
 
-
-    # IMPLEMENTAR
-    # API
-    # URL DE BUSQUEDA:
-    # /centros/<centro_id>/turnos_disponibles/?fecha=xx/xx/xx
-    # La fecha viene en args. CAPTURAR CON request.args.get('fecha')...
-    # ESTOY TRAYENDO LOS OCUPADOS, CAMBIAR POR DISPONIBLES.
-
     """
          API endpoint: /centros/<centro_id>/turnos_disponibles/?fecha=<fecha>
 
@@ -669,6 +644,7 @@ def api_centro_turnos(centro_id):
     data = {}
     data['turnos'] = []
     delta = datetime.timedelta(minutes=30)
+    # date toma el dia pasado, si no se pasa el argumento toma el dia de hoy
     fecha = request.args.get('fecha')
     if fecha:
         date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
@@ -681,6 +657,10 @@ def api_centro_turnos(centro_id):
                     datetime.time(13),datetime.time(13,30),
                     datetime.time(14),datetime.time(14,30),
                     datetime.time(15),datetime.time(15,30)]
+    # Filtro los turnos del dia del centro recibido
+    turnos_del_dia = Appointment.query.filter_by(center_id=centro_id,appointment_date=date)
+    for turno in turnos_del_dia:
+        todos_los_turnos.remove(turno.start_time)
     for turno in todos_los_turnos:
         fin = (datetime.datetime.combine(datetime.date(1,1,1),turno) + delta).time()
         data['turnos'].append({
@@ -689,19 +669,7 @@ def api_centro_turnos(centro_id):
             'hora_fin': fin.strftime("%H:%M"),
             'fecha': date.strftime('%Y-%m-%d')
         })
-    with open('data.json', 'w') as outfile:
-        json.dump(data, outfile)
-    # Obtener los turnos del dia recibido #
-    # Si no se especifica, obtener los del día #
-    a = jsonify(data)
-    turnos_del_dia = Appointment.query.filter_by(appointment_date=date) # Filtrar por fecha
-    for turno in turnos_del_dia:
-        todos_los_turnos.remove(turno.start_time)
-    # Serializar a JSON los turnos #
-
-    turnos_del_dia_schema = AppointmentSchema(many=True)
-    output = turnos_del_dia_schema.dump(turnos_del_dia)
-    
+    a = json.dumps(data, sort_keys=False)
     # Crear una respuesta HTTP 200 OK con el JSON de Turnos del dia #
     
     res = make_response(a, 200, {

@@ -382,22 +382,16 @@ def crear_centro():
 
         municipios_list = sorted(results)
 
-        # municipios_list = ['La Plata']
         form = HelpCenterForm()
         form.town.choices = municipios_list
-        tipos = CenterType.query.with_entities(CenterType.name_center_type).all()
-        tipos_lista = []
-        for tipo in tipos:
-            tipos_lista.append(tipo[0])
-        form.center_type.choices = tipos_lista
-        print (form.town.choices)
+        form.center_type_id.choices = CenterType.query.with_entities(CenterType.id,CenterType.name_center_type ).all()
         if form.validate_on_submit():
             protocol_path = ""
             if form.visit_protocol.data:
                 protocol_file = form.visit_protocol.data
                 filename_vp = secure_filename(protocol_file.filename)
-                protocol_ṕath= path.join(current_app.root_path, 'static/uploads', filename_vp)
-                protocol_file.save(protocol_ṕath)
+                protocol_path= path.join(current_app.root_path, 'static/uploads', filename_vp)
+                protocol_file.save(protocol_path)
             help_center = HelpCenter(
                 name_center=form.name_center.data,
                 address=form.address.data,
@@ -409,7 +403,7 @@ def crear_centro():
                 email=form.email.data,
                 visit_protocol=protocol_path,
                 status_id=1,
-                center_type_id=CenterType.query.filter_by(name_center_type=form.center_type.data).first().id,
+                center_type_id=form.center_type_id.data,
                 latitude=form.latitude.data,
                 longitude=form.longitude.data
                 )        
@@ -450,30 +444,25 @@ def actualizar_centro(id):
 
         municipios_list = sorted(results)
 
-        # municipios_list = ['La Plata']
         current_center = HelpCenter.query.filter_by(id=id).first()
         current_protocol = current_center.visit_protocol
-        print('_______')
-        print('_______')
-        print('_______')
-        print(current_protocol)
-        print('_______')
-        print('_______')
-        print('_______')
+        current_protocol_name = str(current_protocol).split('/')[-1:][0]
         form = HelpCenterForm(obj=current_center)
         form.town.choices = municipios_list
-        tipos = CenterType.query.with_entities(CenterType.name_center_type).all()
-        tipos_lista = []
-
-        for tipo in tipos:
-            tipos_lista.append(tipo[0])
-        form.center_type.choices = tipos_lista
+        form.center_type_id.choices = CenterType.query.with_entities(CenterType.id, CenterType.name_center_type).all()
         if form.validate_on_submit():
+            if form.visit_protocol.data != current_protocol:
+                protocol_file = form.visit_protocol.data
+                filename_vp = secure_filename(protocol_file.filename)
+                protocol_path = path.join(
+                    current_app.root_path, 'static/uploads', filename_vp)
+                protocol_file.save(protocol_path)
+                form.visit_protocol.data = protocol_path
             form.populate_obj(current_center)
             db.session.commit()
             flash('Los cambios se guardaron correctamente.', 'success')
             return redirect(url_for('admin.centros_ayuda'))
-        return render_template('admin/centro_edit.html', form=form, current_protocol=current_protocol)
+        return render_template('admin/centro_edit.html', form=form, current_protocol=current_protocol_name, edit_mode=True)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
         return redirect(url_for('admin.index'))

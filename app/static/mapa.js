@@ -8,7 +8,10 @@ $(document).ready(function () {
 
     mymap.attributionControl.setPrefix(false);
     console.log($("#latitude").val(), $("#longitude").val())
-    var marker = L.marker([$("#latitude").val(), $("#longitude").val()], { draggable: 'true' }).addTo(mymap);
+    if ($("#latitude").val(), $("#longitude").val())
+        var marker = L.marker([$("#latitude").val(), $("#longitude").val()], { draggable: 'true' }).addTo(mymap);
+    else
+        var marker = L.marker([-34.921408, -57.954555], { draggable: 'true' }).addTo(mymap);
     var popup = L.popup();
 
 

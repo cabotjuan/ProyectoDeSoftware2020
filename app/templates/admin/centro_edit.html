@@ -6,16 +6,36 @@
 {% endblock %}
 {% block content %}
 <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
+    <ol class="breadcrumb mb-0 shadow-color-4">
         <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Centro de ayuda</li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.centros_ayuda') }}">Centros de ayuda</a></li>
+        {% if edit_mode %}
+        <li class="breadcrumb-item active" aria-current="page">Actualizar </li>
+        {% else %}
+        <li class="breadcrumb-item active" aria-current="page">Agregar</li>
+        {% endif%}
     </ol>
 </nav>
 
 <form method="post" novalidate enctype="multipart/form-data">
     {{ form.hidden_tag() }}
     <div class="container-fluid">
-        <div class="row d-flex justify-content-center">
+        <div class="row p-4 bg-color-3 text-white">
+            <div class="col-md-2 d-flex flex-column align-items-center">
+                <div class="logo-centros">
+                    <img src="/static/img/Center3.png" class="card-img-top" alt="configuracion">
+                </div>
+            </div>
+            <div class="col-md d-flex flex-column align-items-start">
+                <h1 class="text-center">Centros de Ayuda</h1>
+                    {% if edit_mode %}
+                    <h3 class="text-center font-weight-light">Actualizar centro</h3>
+                    {% else %}
+                    <h3 class="text-center font-weight-light">Agregar centro</h3>
+                    {% endif%}
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center mt-4">
             <div class="col-md-4 d-flex flex-column align-content-start">
                 <div>
                     {{ form.name_center.label }}
@@ -54,7 +74,7 @@
                 </div>
                 <div class="mb-3">
                     {{ form.town.label }} <br>
-                    {{ form.town(class="form-control", id="municipios")|replace('value="%s"'%form.town.data, 'selected value="%s"'%form.town.data)|safe }}
+                    {{ form.town(class="form-control", id="municipios", data_value=form.town.data) }}
                     {% for error in form.town.errors %}
                     <span style="color: red;">{{ error }}</span>
                     {% endfor %}
@@ -85,9 +105,9 @@
                     {% endfor %}
                 </div>
                 <div class="mb-3">
-                    {{ form.center_type.label }} <br>
-                    {{ form.center_type(class="form-control", id="tiposcentro")|replace('value="%s"'%form.center_type.data, 'selected value="%s"'%form.center_type.data)|safe }}
-                    {% for error in form.center_type.errors %}
+                    {{ form.center_type_id.label }} <br>
+                    {{ form.center_type_id(class="form-control", id="tiposcentro", data_centro=form.center_type_id.data) }}
+                    {% for error in form.center_type_id.errors %}
                     <span style="color: red;">{{ error }}</span>
                     {% endfor %}
                 </div>
@@ -106,17 +126,21 @@
                     {% endfor %}
                 </div>
                 <div id="mapid"></div>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center mt-4">
+            <div class="col-md-6  d-flex flex-column align-content-center justify-content-center">
+
                 <hr>
-                {{ form.submit(class='btn btn-lg btn-primary btn-block') }}
-                <a class="btn btn-lg btn-outline-secondary btn-block" href="{{ url_for('admin.index') }}">Cancelar</a>
+                {{ form.submit(class='btn btn-lg btn-primary m-1') }}
+                <a class="btn btn-lg btn-outline-secondary m-1 " href="{{ url_for('admin.centros_ayuda') }}">Cancelar</a>
                 <hr>
-                
             </div>
         </div>
     </div>
-    
+    <script src="/static/select2init.js"></script>
+    <script src="/static/mapa.js"></script>
+
 </form>
-<script src="/static/select2init.js"></script>
-<script src="/static/mapa.js"></script>
 
 {% endblock %}

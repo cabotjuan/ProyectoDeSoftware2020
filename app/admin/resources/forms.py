@@ -91,7 +91,7 @@ class HelpCenterForm (FlaskForm):
     web = StringField('Página web')
     email = StringField('Email', validators=[Optional(), Email()])
     visit_protocol = FileField('Protocolo de visita', validators=[Optional(), FileAllowed(['pdf'], 'Solo archivos pdf')])
-    center_type = SelectField('Tipo de centro', validators=[DataRequired('Este campo es requerido')])
+    center_type_id = SelectField('Tipo de centro', validators=[DataRequired('Este campo es requerido')])
     latitude = StringField('Latitud', validators=[DataRequired('Este campo es requerido')])
     longitude = StringField('Longitud', validators=[DataRequired('Este campo es requerido')])
     submit = SubmitField('Guardar cambios')

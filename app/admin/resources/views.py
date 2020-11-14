@@ -6,6 +6,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy import or_
 from os import path
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import CombinedMultiDict
 import requests, math, decimal, datetime, json
 
 # Blueprint Administracion
@@ -451,23 +452,28 @@ def actualizar_centro(id):
 
         # municipios_list = ['La Plata']
         current_center = HelpCenter.query.filter_by(id=id).first()
+        current_protocol = current_center.visit_protocol
+        print('_______')
+        print('_______')
+        print('_______')
+        print(current_protocol)
+        print('_______')
+        print('_______')
+        print('_______')
         form = HelpCenterForm(obj=current_center)
-        print(form.town.data)
-        print('111111111111111111111111')
         form.town.choices = municipios_list
         tipos = CenterType.query.with_entities(CenterType.name_center_type).all()
         tipos_lista = []
-        print(form.town.data)
-        print('222222222222222222222222')
+
         for tipo in tipos:
             tipos_lista.append(tipo[0])
         form.center_type.choices = tipos_lista
-
         if form.validate_on_submit():
             form.populate_obj(current_center)
-        db.session.commit()
-
-        return render_template('admin/centro_edit.html', form=form)
+            db.session.commit()
+            flash('Los cambios se guardaron correctamente.', 'success')
+            return redirect(url_for('admin.centros_ayuda'))
+        return render_template('admin/centro_edit.html', form=form, current_protocol=current_protocol)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
         return redirect(url_for('admin.index'))

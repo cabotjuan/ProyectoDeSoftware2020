@@ -2,10 +2,13 @@
 
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, SubmitField, ValidationError, SelectMultipleField
-from wtforms import TextAreaField, IntegerField, BooleanField, RadioField, HiddenField, SelectField
+from wtforms import TextAreaField, IntegerField, BooleanField, RadioField, HiddenField, SelectField, TimeField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
 from app.models.model import User, Role
 from wtforms.widgets import CheckboxInput, ListWidget
+from wtforms.widgets import html5 as widgets
+import datetime
 
 class MultiCheckboxfield(SelectMultipleField):
     widget = ListWidget(prefix_label=False)
@@ -23,6 +26,7 @@ class UserForm(FlaskForm):
     last_name = StringField('Apellido', validators=[DataRequired()])
     admin = BooleanField('Administrador')
     operator = BooleanField('Operador')
+
 class RegistrationForm(UserForm):
     """
     Formulario para crear una nueva cuenta de Usuario
@@ -77,3 +81,23 @@ class ConfigForm (FlaskForm):
     n_elements = IntegerField('Numero de elementos', validators=[DataRequired(), NumberRange(min=0)])
     site_enabled = BooleanField('Sitio público habilitado')
     submit = SubmitField('Guardar cambios')
+
+class AppointmentForm(FlaskForm):
+    """
+    Formulario general de turnos
+    """
+    id = HiddenField('id')
+    submit = SubmitField('Guardar')
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    start_time = TimeField('Hora de inicio:', validators=[DataRequired()],format='%H:%M', widget = widgets.TimeInput())
+    appointment_date = DateField('Fecha:', validators=[DataRequired()], format='%Y-%m-%d')
+
+    def validate_start_time(self, field):
+        if field.data < datetime.time(9):
+            raise ValidationError('Los turnos se dan desde las 9:00.')
+        if field.data > datetime.time(15,30):
+            raise ValidationError('Los turnos se dan hasta las 15:30.')
+
+    def validate_appointment_date(self, field):
+        if field.data < datetime.date.today():
+            raise ValidationError('La fecha debe ser desde el dia de hoy.')

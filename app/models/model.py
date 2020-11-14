@@ -153,7 +153,7 @@ class Appointment(db.Model):
     __tablename__ ='appointments'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(60), index=True, unique=True)
+    email = db.Column(db.String(60), index=True)    
     start_time = db.Column(db.Time(), nullable=False)
     end_time = db.Column(db.Time(), nullable=False)
     appointment_date = db.Column(db.Date(), nullable=False)
@@ -179,3 +179,12 @@ class StatusSchema(ma.SQLAlchemyAutoSchema):
 class AppointmentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Appointment
+
+class AvailableAppointmentsSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Appointment
+
+    start_time = ma.auto_field()
+    end_time = ma.auto_field()
+    appointment_date = ma.auto_field()
+    center_id = ma.auto_field()

@@ -1,26 +1,20 @@
 {% extends "admin/layout.html" %}
-{% block title %} {{ title }} {% endblock %}
-{% block head %}
-{{ super() }}
-{% endblock %}
-{% block navbar %}
 
-{% endblock %}
+{% block title %} {{title}} {% endblock %}
+
 {% block content %}
-
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
         <li class="breadcrumb-item"><a href="{{ url_for('admin.centros_ayuda') }}">Centros</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Actualizar Turno</li>
+        <li class="breadcrumb-item active" aria-current="page">Sacar turno</li>
     </ol>
 </nav>
-
 <form method="post" novalidate>
+    {{ form.hidden_tag() }}
     <div class="container-fluid">
         <div class="row d-flex justify-content-center">
             <div class="col-md-4 align-self-center">
-                {{ form.hidden_tag() }}
                 <div>
                     <h3>{{ center_name }}</h3><hr>
                 </div>
@@ -51,5 +45,4 @@
         </div>
     </div>
 </form>
-
 {% endblock %}

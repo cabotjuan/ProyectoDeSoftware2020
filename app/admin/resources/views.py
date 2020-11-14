@@ -767,28 +767,35 @@ def api_centro_reserva(centro_id):
         opening_center = HelpCenter.query.filter_by(id=centro_id).first().opening_time
         close_center = HelpCenter.query.filter_by(id=centro_id).first().close_time
 
-        appointment_start = datetime.datetime.strptime(data["start_time"], '%H:%M').time()
-        appointment_end = datetime.datetime.strptime(data["end_time"], '%H:%M').time()
+        request_start = datetime.datetime.strptime(data["start_time"], '%H:%M').time()
+        request_end = datetime.datetime.strptime(data["end_time"], '%H:%M').time()
 
-        if not (appointment_start >= opening_center and appointment_end <= close_center):
-            raise Exception("El horario solicitado está fuera del rango del horario de atención.")
+        appointment_start = request_start
+        appointment_end = request_end
+
+        exists = Appointment.query.filter_by(center_id=centro_id).filter_by(appointment_date=data["appointment_date"]).filter_by(start_time=data["start_time"]).first()
+        
+
         if not center_accepted:
             raise Exception("El centro de ayuda no está disponible.")
-        exists = Appointment.query.filter_by(center_id=centro_id).filter_by(appointment_date=data["appointment_date"]).filter_by(start_time=data["start_time"]).first()
-        if not exists:
-            appointment = Appointment(**{k: data[k] for k in("email",
-                "start_time",
-                "end_time",
-                "appointment_date",
-                "center_id"
-            ) if k in data})
-
-            db.session.add(appointment)
-            db.session.commit()
-            res = make_response(jsonify(data), 201, {
-                            'Content-Type': 'application/json; charset=utf-8'})
-        else:
+        if not (appointment_start >= opening_center and appointment_end <= close_center):
+            raise Exception("El horario solicitado está fuera del rango del horario de atención.")
+        correct_end=(datetime.datetime.combine(datetime.date(1,1,1),request_start)+datetime.timedelta(minutes=30)).time()
+        if not (correct_end == request_end):
+            raise Exception("Los bloques deben ser de 30 minutos.")
+        if exists:
             raise Exception("El turno solicitado ya está reservado.")
+        appointment = Appointment(**{k: data[k] for k in("email",
+            "start_time",
+            "end_time",
+            "appointment_date",
+            "center_id"
+        ) if k in data})
+
+        db.session.add(appointment)
+        db.session.commit()
+        res = make_response(jsonify(data), 201, {
+                        'Content-Type': 'application/json; charset=utf-8'})
 
     except Exception as err:
         res = make_response(

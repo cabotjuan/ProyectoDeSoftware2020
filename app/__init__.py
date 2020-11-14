@@ -20,7 +20,7 @@ def create_app(environment="development"):
     login_manager.login_view = "admin.login"
 
     # Configuracion file_upload
-    app.config["UPLOAD_FOLDER"] = '/static/uploads'
+    app.config["UPLOAD_FOLDER"] = 'static/uploads'
     app.config["ALLOWED_EXTENSIONS"] = ["pdf"]
     app.config["MAX_CONTENT_LENGTH"] = 1000 * 1024  # 1mb
 

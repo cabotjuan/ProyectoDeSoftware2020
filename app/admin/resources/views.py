@@ -485,6 +485,7 @@ def eliminar_centro(id):
             flash('El centro de ayuda solicitado no existe.', 'danger')
             return redirect(url_for('admin.centros_ayuda'))
 
+        Appointment.query.filter_by(center_id=id).delete()
         db.session.delete(center_delete)
         db.session.commit()
 

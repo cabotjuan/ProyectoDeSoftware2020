@@ -760,9 +760,41 @@ def api_centro_turnos(centro_id):
 @ admin_bp.route('/centros/<centro_id>/reserva', methods=["POST"])
 def api_centro_reserva(centro_id):
 
-    # IMPLEMENTAR
+    try:
+        data = request.get_json()
+        center_accepted = HelpCenter.query.filter_by(id=centro_id).filter_by(status_id=1).first()
+        
+        opening_center = HelpCenter.query.filter_by(id=centro_id).first().opening_time
+        close_center = HelpCenter.query.filter_by(id=centro_id).first().close_time
 
-    return 'response'
+        appointment_start = datetime.datetime.strptime(data["start_time"], '%H:%M').time()
+        appointment_end = datetime.datetime.strptime(data["end_time"], '%H:%M').time()
+
+        if not (appointment_start >= opening_center and appointment_end <= close_center):
+            raise Exception("El horario solicitado está fuera del rango del horario de atención.")
+        if not center_accepted:
+            raise Exception("El centro de ayuda no está disponible.")
+        exists = Appointment.query.filter_by(center_id=centro_id).filter_by(appointment_date=data["appointment_date"]).filter_by(start_time=data["start_time"]).first()
+        if not exists:
+            appointment = Appointment(**{k: data[k] for k in("email",
+                "start_time",
+                "end_time",
+                "appointment_date",
+                "center_id"
+            ) if k in data})
+
+            db.session.add(appointment)
+            db.session.commit()
+            res = make_response(jsonify(data), 201, {
+                            'Content-Type': 'application/json; charset=utf-8'})
+        else:
+            raise Exception("El turno solicitado ya está reservado.")
+
+    except Exception as err:
+        res = make_response(
+            jsonify({"mensaje": str(err)}), 400)
+
+    return res
 
 
 #  TESTING ROUTES #

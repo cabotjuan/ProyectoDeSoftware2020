@@ -1,7 +1,7 @@
+from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm, EditForm, HelpCenterForm, AppointmentForm
 from flask import flash, redirect, session, render_template, url_for, Blueprint, request, jsonify, make_response, current_app, abort
 from app.models.model import User, Role, Permission, users_roles, Config, HelpCenter, Status, CenterType, Appointment, HelpCenterSchema, CenterTypeSchema, StatusSchema, AppointmentSchema
 from app.extensions import db
-from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm, EditForm, HelpCenterForm
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy import or_
 from os import path
@@ -22,8 +22,9 @@ def index():
     print(current_app.config['UPLOAD_FOLDER'])
     return render_template('admin/index.html')
 
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # AUTH ROUTES #
-
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -58,8 +59,9 @@ def logout():
     logout_user()
     return redirect(url_for('admin.login'))
 
-
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # USER ROUTES #
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @admin_bp.route('/usuarios/registrar/', methods=['GET', 'POST'])
 @login_required
@@ -314,9 +316,9 @@ def eliminar_usuario(id):
         flash('No tienes permisos para realizar esa acción.', 'danger')
         return redirect(url_for('admin.index'))
 
-
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CRUD CENTROS DE AYUDA #
-
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @admin_bp.route('listado_centros/', methods=['GET', 'POST'])
 @admin_bp.route('listado_centros/<int:page>/', methods=['GET', 'POST'])
@@ -352,7 +354,6 @@ def centros_filtrar_estado(page=1):
 @admin_bp.route('centro/<id>', methods=['GET', 'POST'])
 @login_required
 def ver_centro(id):
-
     # IMPLEMENTAR
     centro = HelpCenter.query.filter_by(id=id).first()
     return render_template('admin/centro.html', centro=centro)
@@ -493,8 +494,36 @@ def eliminar_centro(id):
     return 'Borrado de Centro de ayuda'
 
 
-#  CRUD TURNOS #
+@ admin_bp.route('centro/aceptar/<id>', methods=['GET', 'POST'])
+@ login_required
+def aceptar_centro(id):
+    id_admin = current_user.get_id()
+    if User.tiene_permiso(id_admin, 4):
+        centro = HelpCenter.query.filter_by(id=id).first().status_id = 1
+        db.session.commit()
+        flash('Centro Aceptado', 'success')
+        return redirect(url_for('admin.centros_ayuda'))
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
+
+@ admin_bp.route('centro/rechazar/<id>', methods=['GET', 'POST'])
+@ login_required
+def rechazar_centro(id):
+    id_admin = current_user.get_id()
+    if User.tiene_permiso(id_admin, 4):
+        centro = HelpCenter.query.filter_by(id=id).first().status_id = 3
+        db.session.commit()
+        flash('Centro Rechazado','success')
+        return redirect(url_for('admin.centros_ayuda'))
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
+
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#  CRUD TURNOS #
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @ admin_bp.route('turnos/', methods=['GET', 'POST'])
 @ admin_bp.route('turnos/<int:page>', methods=['GET', 'POST'])
@@ -540,10 +569,10 @@ def turnos_buscar(page=1):
         if search_name:
             results = HelpCenter.query.filter(
                 HelpCenter.name_center.contains(search_name)).with_entities(HelpCenter.id)
-
             help_centers_ids = [value for value, in results]
             turnos = Appointment.query.filter(
-                Appointment.center_id.in_(help_centers_ids))
+                Appointment.center_id.in_(help_centers_ids)).union(Appointment.query.filter(Appointment.email.contains(search_name)))
+            
             if search_date:
                 turnos = turnos.filter_by(
                     appointment_date=search_date)
@@ -565,20 +594,22 @@ def turnos_buscar(page=1):
 @ login_required
 def turnos_centro_buscar(id,page=1):
     search_date = request.form.get('buscar-fecha')
+    search_name = request.form.get('buscar-nombre')
     id_usuario = current_user.get_id()
     usuarios_por_pag = Config.query.first().n_elements
     centro = HelpCenter.query.filter_by(id=id).first()
     if User.tiene_permiso(id_usuario, 1):
         turnos = Appointment.query.filter_by(center_id=centro.id)
+        if search_name:
+            turnos = turnos.filter(Appointment.email.contains(search_name))
         if search_date:
             turnos=turnos.filter_by(
                 appointment_date=search_date)
         turnos = turnos.paginate(page, per_page=usuarios_por_pag)
-        return render_template('admin/turnos.html', turnos=turnos, search_date=search_date, centro=centro)
+        return render_template('admin/turnos.html', turnos=turnos, search_date=search_date, search_name=search_name, centro=centro)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
         return redirect(url_for('admin.index'))
-
 
 @ admin_bp.route('centro/<id>/turnos', methods=['GET', 'POST'])
 @ login_required
@@ -594,51 +625,119 @@ def turnos_centro(id,page=1):
         return redirect(url_for('admin.index'))
 
 
-@ admin_bp.route('centro/crear_turno', methods=['GET', 'POST'])
-@ admin_bp.route('centro/<id>/crear_turno', methods=['GET', 'POST'])
-@ login_required
+@ admin_bp.route('centro/turnos/crear', methods=['GET', 'POST'])
+@admin_bp.route('centro/<id>/turnos/crear', methods=['GET', 'POST'])
+@login_required
 def crear_turno(id=0):
+    """
+        CREATE
+        Registar un nuevo turno
+        ID 12 TURNO_NEW permisos
+    """
+    id_usuario = current_user.get_id()
+    if User.tiene_permiso(id_usuario, 12):
+        centro = HelpCenter.query.get(id)
+        centro_nombre = centro.name_center
+        form = AppointmentForm()
 
-    # Lista de Listas con Horarios Disponibles para hoy, mañana y pasado mañana .
+        #POST
+        if form.validate_on_submit():
+            appointment = Appointment(
+                email=form.email.data,
+                start_time=form.start_time.data,
+                appointment_date=form.appointment_date.data)
+            delta = datetime.timedelta(minutes=30)
+            start = appointment.start_time
+            appointment.end_time = (datetime.datetime.combine(datetime.date(1,1,1),start) + delta).time()
+            # Me trae el turno del centro recibido, con esa fecha y esa hora de inicio 
+            turnos_del_dia = Appointment.query.filter_by(center_id=id,appointment_date=appointment.appointment_date,start_time=appointment.start_time).first()
+            if not turnos_del_dia:
+                centro.appointments.append(appointment)
+                db.session.commit()
+            else:
+                flash('Turno no disponible', 'danger')
+                return render_template('admin/turno_create.html', form=form, center_name=centro_nombre, title='Centros de Ayuda GBA - Sacar turno')
 
-    # Consultar Qué turnos ya fueron tomados para el dia de hoy, ma;ana y pasado.
-
-    availability = [
-        ['9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00',
-            '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30'],
-        ['9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00',
-            '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30'],
-        ['9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00',
-            '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30'],
-    ]
-
-    # Recibo una fecha y un horario.
-
-    #
-
-    return render_template('admin/turno_edit.html', horarios=availability)
+            # redirecciona a pagina turnos del dia del centro
+            # return redirect(url_for('admin.turnos_centro({})'.format(id)))
+            flash('Turno creado exitosamente', 'success')
+            return redirect(url_for('admin.index'))
+        return render_template('admin/turno_create.html', form=form, center_name=centro_nombre, title='Centros de Ayuda GBA - Sacar turno')
+    else:
+        flash('No tienes permisos para realizar esa acción', 'danger')
+        return redirect(url_for('admin.index'))
 
 
-@ admin_bp.route('centro/<id>/turnos', methods=['GET', 'POST'])
+@ admin_bp.route('turnos/actualizar/<id>', methods=['GET', 'POST'])
 @ login_required
 def actualizar_turno(id):
+    """
+        UPDATE
+        Actualiza un turno
+        ID 14 TURNO_UPDATE permisos
+    """
+    id_admin = current_user.get_id()
+    if User.tiene_permiso(id_admin, 14):
+        turno_edit = Appointment.query.get(id)
+        if not turno_edit:
+            flash('El turno solicitado no existe.', 'danger')
+            return redirect(url_for('admin.index'))
+        centro = HelpCenter.query.get(turno_edit.center_id)
+        centro_nombre = centro.name_center
+        form = AppointmentForm(obj=turno_edit, id=id)
 
-    # IMPLEMENTAR
+        # POST.
+        if form.validate_on_submit():
+            form.populate_obj(turno_edit)
+            delta = datetime.timedelta(minutes=30)
+            start = form.start_time.data
+            turno_edit.end_time = (datetime.datetime.combine(datetime.date(1,1,1),start) + delta).time()
+            # Me trae el turno del centro recibido, con esa fecha y esa hora de inicio 
+            turnos_del_dia = Appointment.query.filter_by(center_id=turno_edit.center_id,appointment_date=turno_edit.appointment_date,start_time=turno_edit.start_time)
+            if turnos_del_dia.count() == 1:
+                db.session.commit()
+                # redirecciona al listado de usuarios
+                flash('Los cambios se guardaron correctamente.', 'success')
+                return redirect(url_for('admin.index'))
+            else:
+                flash('Turno no disponible', 'danger')
+                return render_template('admin/turno_edit.html', form=form, center_name=centro_nombre, title='Centros de Ayuda GBA - Actualizar turno')
+        return render_template('admin/turno_edit.html', form=form, center_name=centro_nombre, title='Centros de Ayuda GBA - Actualizar turno')
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
-    return render_template('admin/turno_edit.html')
 
 
-@ admin_bp.route('centro/<id>/turnos', methods=['GET', 'POST'])
+@ admin_bp.route('turnos/eliminar/<id>', methods=['GET', 'POST'])
 @ login_required
 def eliminar_turno(id):
 
-    # IMPLEMENTAR
+    """
+        DELETE
+        Eliminar un turno
+        ID 13 TURNO_DESTROY permisos
+    """
+    id_usuario = current_user.get_id()
+    if User.tiene_permiso(id_usuario, 13):
 
-    return 'Borrado de Turno'
+        turno = Appointment.query.get(id)
+        if not turno:
+            flash('El turno no existe.','danger')
+            return redirect(url_for('admin_index'))
+        
+        db.session.delete(turno)
+        db.session.commit()
 
+        flash('El turno se eliminó correctamente.', 'success')
+        return redirect(url_for('admin.turnos'))
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #  API ROUTES #
-
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @ admin_bp.route('/centros', methods=["GET", "POST"])
 def api_centros():
@@ -745,17 +844,57 @@ def api_centro(centro_id):
 @ admin_bp.route('/centros/<centro_id>/turnos_disponibles/', methods=["GET"])
 def api_centro_turnos(centro_id):
 
-    # IMPLEMENTAR
-    # URL DE BUSQUEDA:
-    # /centros/<centro_id>/turnos_disponibles/?fecha=xx/xx/xx
-    # La fecha viene en args. CAPTURAR CON request.args.get('fecha')...
-    return 'response'
+    """
+         API endpoint: /centros/<centro_id>/turnos_disponibles/?fecha=<fecha>
+
+         Method GET:
+             Este servicio permite obtener el listado de los turnos disponibles
+             para UN centro de ayuda en un dia en particular
+
+    """
+
+    data = {}
+    data['turnos'] = []
+    delta = datetime.timedelta(minutes=30)
+    # date toma el dia pasado, si no se pasa el argumento toma el dia de hoy
+    fecha = request.args.get('fecha')
+    if fecha:
+        date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
+    else:
+        date = datetime.date.today()
+    todos_los_turnos=[datetime.time(9),datetime.time(9,30),
+                    datetime.time(10),datetime.time(10,30),
+                    datetime.time(11),datetime.time(11,30),
+                    datetime.time(12),datetime.time(12,30),
+                    datetime.time(13),datetime.time(13,30),
+                    datetime.time(14),datetime.time(14,30),
+                    datetime.time(15),datetime.time(15,30)]
+    # Filtro los turnos del dia del centro recibido
+    turnos_del_dia = Appointment.query.filter_by(center_id=centro_id,appointment_date=date)
+    for turno in turnos_del_dia:
+        todos_los_turnos.remove(turno.start_time)
+    for turno in todos_los_turnos:
+        fin = (datetime.datetime.combine(datetime.date(1,1,1),turno) + delta).time()
+        data['turnos'].append({
+            'centro_id': int(centro_id),
+            'hora_inicio': turno.strftime("%H:%M"),
+            'hora_fin': fin.strftime("%H:%M"),
+            'fecha': date.strftime('%Y-%m-%d')
+        })
+    a = json.dumps(data, sort_keys=False)
+    # Crear una respuesta HTTP 200 OK con el JSON de Turnos del dia #
+    
+    res = make_response(a, 200, {
+        'Content-Type': 'application/json; charset=utf-8'})
+    
+    return res
 
 
 @ admin_bp.route('/centros/<centro_id>/reserva', methods=["POST"])
 def api_centro_reserva(centro_id):
 
     # IMPLEMENTAR
+    # API
 
     return 'response'
 

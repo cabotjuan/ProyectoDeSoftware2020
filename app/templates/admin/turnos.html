@@ -11,7 +11,8 @@
     <ol class="breadcrumb mb-0 shadow-color-4">
         <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
         {% if centro %}
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.ver_centro', id=centro.id) }}">{{centro.name_center}}</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.ver_centro', id=centro.id) }}">{{centro.name_center}}</a>
+        </li>
         {% endif %}
         <li class="breadcrumb-item active" aria-current="page">Turnos</li>
     </ol>
@@ -34,42 +35,43 @@
         <div class="col d-flex justify-content-start align-items-center p-2">
             {% if not centro %}
             <form action="{{ url_for('admin.turnos_buscar') }}" method="POST">
-            {% else %}
-            <form action="{{ url_for('admin.turnos_centro_buscar', id=centro.id) }}" method="POST">
-            {% endif %}
-                <div class="input-group mb-3">
-                    {% if not centro %}
-                    <div class="search-box d-inline-flex">
-                            {% if search_name%}
-                            <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..."
-                                aria-label="buscar por nombre" aria-describedby="buscar-boton" value="{{search_name}}">
+                {% else %}
+                <form action="{{ url_for('admin.turnos_centro_buscar', id=centro.id) }}" method="POST">
+                    {% endif %}
+                    <div class="input-group mb-3">
+                        <div class="search-box d-inline-flex">
+                            {% if search_name %}
+                            <input type="search" class="form-control" name="buscar-nombre"
+                                placeholder="Buscar nombre..." aria-label="buscar por nombre"
+                                aria-describedby="buscar-boton" value="{{search_name}}">
                             {% else %}
-                            <input type="search" class="form-control" name="buscar-nombre" placeholder="Buscar nombre..."
-                                aria-label="buscar por nombre" aria-describedby="buscar-boton">
+                            <input type="search" class="form-control" name="buscar-nombre"
+                                placeholder="Buscar nombre..." aria-label="buscar por nombre"
+                                aria-describedby="buscar-boton">
                             {% endif %}
                         </div>
-                        {% endif %}
-                    <div class="search-box d-inline-flex">
-                        {% if search_date %}
-                        <input type="date" class="form-control" name="buscar-fecha" placeholder="Filtrar por Fecha"
-                            aria-label="buscar por fecha" aria-describedby="buscar-boton" value="{{search_date}}">
-                        {% else %}
-                        <input type="date" class="form-control" name="buscar-fecha" placeholder="Filtrar por Fecha"
-                            aria-label="buscar por fecha" aria-describedby="buscar-boton">
-            {% endif %}
+                        <div class="search-box d-inline-flex">
+                            {% if search_date %}
+                            <input type="date" class="form-control" name="buscar-fecha" placeholder="Filtrar por Fecha"
+                                aria-label="buscar por fecha" aria-describedby="buscar-boton" value="{{search_date}}">
+                            {% else %}
+                            <input type="date" class="form-control" name="buscar-fecha" placeholder="Filtrar por Fecha"
+                                aria-label="buscar por fecha" aria-describedby="buscar-boton">
+                            {% endif %}
+                        </div>
+
+                        <div class="input-group-append">
+                            <button class="btn btn-secondary" type="submit" id="buscar-boton"><i
+                                    class="fas fa-search"></i></button>
+                        </div>
                     </div>
 
-                    <div class="input-group-append">
-                        <button class="btn btn-secondary" type="submit" id="buscar-boton"><i
-                                class="fas fa-search"></i></button>
-                    </div>
-                </div>
-
-            </form>
+                </form>
         </div>
         <div class="col d-flex justify-user-options p-2">
             <div>
-                <a class="btn-success btn" href="{{ url_for('admin.crear_turno') }}">Nuevo turno <i class="fas fa-plus"></i> </a>
+                <a class="btn-success btn" href="{{ url_for('admin.crear_turno') }}">Nuevo turno <i
+                        class="fas fa-plus"></i> </a>
             </div>
         </div>
     </div>
@@ -78,7 +80,9 @@
             <table class="table table-sm table-hover table-light table-striped">
                 <thead>
                     <tr>
+                        {% if not centro %}
                         <th scope="col">Centro de Ayuda</th>
+                        {% endif %}
                         <th scope="col">Email Solicitante</th>
                         <th scope="col">Fecha</th>
                         <th scope="col">Hora</th>
@@ -93,8 +97,9 @@
                     {% else %}
 
                     {% for turno in turnos.items %}
-
+                    {% if not centro %}
                     <td>{{ turno.help_centers.name_center }}</td>
+                    {% endif %}
                     <td>{{ turno.email }}</td>
                     <td>{{ turno.appointment_date }}</td>
                     <td>{{ turno.start_time.strftime('%H:%M') }} - {{ turno.end_time.strftime('%H:%M') }} </td>

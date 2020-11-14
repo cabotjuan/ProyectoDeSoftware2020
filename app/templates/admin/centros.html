@@ -97,6 +97,10 @@
                     <tr class="table-primary" id="{{ centro.id }}">
                         <th scope="row">
                             <span class="badge badge-primary">{{ centro.statuses.name_status}}</span><br>
+                            <a class="text-white btn btn-success btn-sm m-1" href="{{ url_for('admin.aceptar_centro', id=centro.id) }}"><i
+                                    class="fas fa-check-circle"></i>Aceptar </a>
+                            <a class="text-white btn btn-danger btn-sm m-1" href="{{ url_for('admin.rechazar_centro', id=centro.id) }}"><i
+                                    class="fas fa-times-circle"></i>Rechazar </a>
                         </th>
                         {% else %}
                     <tr class="table-danger" id="{{ centro.id }}">

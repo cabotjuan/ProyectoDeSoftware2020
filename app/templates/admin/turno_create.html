@@ -1,26 +1,20 @@
 {% extends "admin/layout.html" %}
-{% block title %}Centros Ayuda GBA - Administracion - Nuevo Turno{% endblock %}
-{% block head %}
-{{ super() }}
-{% endblock %}
-{% block navbar %}
 
-{% endblock %}
+{% block title %} {{title}} {% endblock %}
+
 {% block content %}
-
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
         <li class="breadcrumb-item"><a href="{{ url_for('admin.centros_ayuda') }}">Centros</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Actualizar Turno</li>
+        <li class="breadcrumb-item active" aria-current="page">Sacar turno</li>
     </ol>
 </nav>
-
 <form method="post" novalidate>
+    {{ form.hidden_tag() }}
     <div class="container-fluid">
         <div class="row d-flex justify-content-center">
             <div class="col-md-4 align-self-center">
-                {{ form.hidden_tag() }}
                 <div>
                     <h3>{{ center_name }}</h3><hr>
                 </div>
@@ -51,24 +45,4 @@
         </div>
     </div>
 </form>
-
 {% endblock %}
-
-<!-- <div id="picker"></div>
-<script type="text/javascript">
-    (function ($) {
-        $('#picker').markyourcalendar({
-            availability: {{ horarios | safe }},
-    weekdays: ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'],
-        onClick: function (ev, data) {
-            // data is a list of datetimes
-            $.each(data, function () {
-                var d = this.split(' ')[0];
-                var t = this.split(' ')[1];
-                $('#selected-date').html(d);
-                $('#selected-time').html(t);
-            });
-        }
-        });
-    }) (jQuery);
-</script> -->

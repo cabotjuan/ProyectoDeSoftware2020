@@ -125,7 +125,7 @@ class HelpCenter(db.Model):
     phone = db.Column(db.String(15), nullable=False)
     opening_time = db.Column(db.Time(), nullable=False)
     close_time = db.Column(db.Time(), nullable=False)
-    town = db.Column(db.String(20), nullable=False)
+    town = db.Column(db.String(60), nullable=False)
     web = db.Column(db.String(80))
     email = db.Column(db.String(40))
     visit_protocol = db.Column(db.String(256))
@@ -153,16 +153,11 @@ class Appointment(db.Model):
     __tablename__ ='appointments'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(60), index=True, unique=True)
+    email = db.Column(db.String(60), index=True)
     start_time = db.Column(db.Time(), nullable=False)
     end_time = db.Column(db.Time(), nullable=False)
     appointment_date = db.Column(db.Date(), nullable=False)
     center_id = db.Column(db.Integer, db.ForeignKey('help_centers.id'))
-
-
-class UserSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = User
 
 class HelpCenterSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

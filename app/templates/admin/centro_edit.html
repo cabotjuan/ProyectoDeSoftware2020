@@ -1,9 +1,6 @@
 {% extends "admin/layout.html" %}
 {% block title %}Centros Ayuda GBA - Administracion - Listado de Centros de Ayuda{% endblock %}
-{% block head %}
 
-{{ super() }}
-{% endblock %}
 {% block navbar %}
 
 {% endblock %}
@@ -15,17 +12,158 @@
     </ol>
 </nav>
 
-<select id="municipios" name="municipios">
-    {% for municipio in municipios %}
-    <option value="{{municipio}}">{{municipio}}</option>
-    {% endfor %}
-</select>
+<form method="post" novalidate enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="container-fluid">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-4 d-flex flex-column align-content-start">
+                <div>
+                    {{ form.name_center.label }}
+                    {{ form.name_center(class="form-control") }}<br>
+                    {% for error in form.name_center.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.address.label }}
+                    {{ form.address(class="form-control") }}<br>
+                    {% for error in form.address.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.phone.label }}
+                    {{ form.phone(class="form-control") }}<br>
+                    {% for error in form.phone.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.opening_time.label }}
+                    {{ form.opening_time(class="form-control") }}<br>
+                    {% for error in form.opening_time.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.close_time.label }}
+                    {{ form.close_time(class="form-control") }}<br>
+                    {% for error in form.close_time.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div class="mb-3">
+                    {{ form.town.label }} <br>
+                    {{ form.town(class="form-control", id="municipios") }}
+                    {% for error in form.town.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.web.label }}
+                    {{ form.web(class="form-control") }}<br>
+                    {% for error in form.web.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4 d-flex flex-column align-content-start">
+                <div>
+                    {{ form.email.label }}
+                    {{ form.email(class="form-control") }}<br>
+                    {% for error in form.email.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.visit_protocol.label }}
+                    {{ form.visit_protocol(class="form-control") }}<br>
+                    {% for error in form.visit_protocol.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div class="mb-3">
+                    {{ form.center_type.label }} <br>
+                    {{ form.center_type(class="form-control", id="tiposcentro") }}
+                    {% for error in form.center_type.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.latitude.label }}
+                    {{ form.latitude(class="form-control", id="latitude") }}<br>
+                    {% for error in form.latitude.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.longitude.label }}
+                    {{ form.longitude(class="form-control", id="longitude") }}<br>
+                    {% for error in form.longitude.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div id="mapid"></div>
+                <hr>
+                {{ form.submit(class='btn btn-lg btn-primary btn-block') }}
+                <a class="btn btn-lg btn-outline-secondary btn-block" href="{{ url_for('admin.index') }}">Cancelar</a>
+                <hr>
+                
+            </div>
+        </div>
+    </div>
+    
+</form>
 
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function () {
+
         $('#municipios').select2();
-        $('#municipios').prop('required','required')
+        $('#municipios').append('<option disabled selected value style="display:none;">Elegí un municipio...</option>');
+        $('#tiposcentro').select2();
+        $('#tiposcentro').append('<option disabled selected value style="display:none;">Elegí un tipo...</option>');
+        $('select2').addClass("w100important");
+
+        if ($("#latitude").val(), $("#longitude").val())
+            var mymap = L.map('mapid').setView([$("#latitude").val(), $("#longitude").val()], 13);
+        else
+            var mymap = L.map('mapid').setView([-34.9187, -57.956], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mymap);
+
+        mymap.attributionControl.setPrefix(false);
+        console.log($("#latitude").val(), $("#longitude").val())
+        var marker = L.marker([$("#latitude").val(), $("#longitude").val()], {draggable: 'true'}).addTo(mymap);
+        var popup = L.popup();
+
+        
+        function onMapClick(e) {
+            marker.setLatLng(e.latlng).addTo(mymap);
+            popup
+            .setLatLng(e.latlng)
+            .setContent("Coordenadas: " + e.latlng.toString());
+            marker.bindPopup(popup.getContent()).openPopup();
+            $("#latitude").val(e.latlng.lat);
+            $("#longitude").val(e.latlng.lng);
+            
+        }
+
+        marker.on('dragend', function(e){
+            let position = marker.getLatLng();
+            popup
+            .setLatLng(position)
+            .setContent("Coordenadas: " + position.toString());
+
+            marker.setLatLng(position, {
+                draggable: 'true'
+            }).bindPopup(popup.getContent()).openPopup();
+            $("#latitude").val(position.lat);
+            $("#longitude").val(position.lng);
+            
+        });
+
+        mymap.on('click', onMapClick);
     });
 </script>
+
 {% endblock %}

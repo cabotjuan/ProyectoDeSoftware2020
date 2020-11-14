@@ -1,11 +1,14 @@
 # app/auth/forms.py
 
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, SubmitField, ValidationError, SelectMultipleField
+from flask_wtf.file import FileField, FileAllowed
+from wtforms import PasswordField, StringField, SubmitField, ValidationError, SelectMultipleField, TimeField
 from wtforms import TextAreaField, IntegerField, BooleanField, RadioField, HiddenField, SelectField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
+from wtforms.ext.sqlalchemy.fields import QuerySelectField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange, Optional, NoneOf
 from app.models.model import User, Role
 from wtforms.widgets import CheckboxInput, ListWidget
+from wtforms.widgets import html5 as widgets
 
 class MultiCheckboxfield(SelectMultipleField):
     widget = ListWidget(prefix_label=False)
@@ -17,10 +20,10 @@ class UserForm(FlaskForm):
     """
     id = HiddenField('id')
     submit = SubmitField('Guardar')
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    username = StringField('Nombre de Usuario', validators=[DataRequired()])
-    first_name = StringField('Nombre', validators=[DataRequired()])
-    last_name = StringField('Apellido', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired('Este campo es requerido'), Email()])
+    username = StringField('Nombre de Usuario', validators=[DataRequired('Este campo es requerido')])
+    first_name = StringField('Nombre', validators=[DataRequired('Este campo es requerido')])
+    last_name = StringField('Apellido', validators=[DataRequired('Este campo es requerido')])
     admin = BooleanField('Administrador')
     operator = BooleanField('Operador')
 class RegistrationForm(UserForm):
@@ -29,7 +32,7 @@ class RegistrationForm(UserForm):
     """
     active = BooleanField('Activo', render_kw={'checked': True})
     password = PasswordField('Contraseña', validators=[
-        DataRequired(),
+        DataRequired('Este campo es requerido'),
         EqualTo('confirm_password')
     ])
     confirm_password = PasswordField('Confirmar Contraseña')
@@ -63,17 +66,34 @@ class LoginForm(FlaskForm):
     """
     Formulario para autenticarse
     """
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Contraseña', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired('Este campo es requerido'), Email()])
+    password = PasswordField('Contraseña', validators=[DataRequired('Este campo es requerido')])
     submit = SubmitField('Iniciar sesión')
 
 class ConfigForm (FlaskForm):
     """
     Formulario para configurar informacion de pagina
     """
-    title = StringField('Título', validators=[DataRequired(), Length(max=40)])
-    description = TextAreaField('Descripción', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    n_elements = IntegerField('Numero de elementos', validators=[DataRequired(), NumberRange(min=0)])
+    title = StringField('Título', validators=[DataRequired('Este campo es requerido'), Length(max=40)])
+    description = TextAreaField('Descripción', validators=[DataRequired('Este campo es requerido')])
+    email = StringField('Email', validators=[DataRequired('Este campo es requerido'), Email()])
+    n_elements = IntegerField('Numero de elementos', validators=[DataRequired('Este campo es requerido'), NumberRange(min=0)])
     site_enabled = BooleanField('Sitio público habilitado')
     submit = SubmitField('Guardar cambios')
+
+class HelpCenterForm (FlaskForm):
+    name_center = StringField('Nombre de centro', validators=[DataRequired('Este campo es requerido'), Length(max=40)])
+    address = StringField('Dirección', validators=[DataRequired('Este campo es requerido'), Length(max=60)])
+    phone = IntegerField('Teléfono', validators=[DataRequired('Este campo es requerido')])
+    opening_time = TimeField('Hora de apertura', validators=[DataRequired('Este campo es requerido')], format='%H:%M', widget = widgets.TimeInput())
+    close_time = TimeField('Hora de cierre', validators=[DataRequired('Este campo es requerido')], format='%H:%M', widget = widgets.TimeInput())
+    town = SelectField('Municipio', validators=[DataRequired('Este campo es requerido')])
+    web = StringField('Página web')
+    email = StringField('Email', validators=[Optional(), Email()])
+    visit_protocol = FileField('Protocolo de visita', validators=[Optional(), FileAllowed(['pdf'], 'Solo archivos pdf')])
+    center_type = SelectField('Tipo de centro', validators=[DataRequired('Este campo es requerido')])
+    latitude = StringField('Latitud', validators=[DataRequired('Este campo es requerido')])
+    longitude = StringField('Longitud', validators=[DataRequired('Este campo es requerido')])
+    submit = SubmitField('Guardar cambios')
+
+   

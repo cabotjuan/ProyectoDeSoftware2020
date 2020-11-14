@@ -65,6 +65,10 @@ body {
     min-height: 100vh;
 }
 
+.w100important{
+    width: 100%!important;
+}
+
 .form-login {
     width: 100%;
     max-width: 330px;
@@ -132,4 +136,8 @@ footer {
     .justify-user-options {
         justify-content: center;
     }
+}
+
+#mapid {
+    height: 180px;
 }

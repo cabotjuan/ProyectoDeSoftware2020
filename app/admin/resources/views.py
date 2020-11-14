@@ -1,14 +1,12 @@
 from flask import flash, redirect, session, render_template, url_for, Blueprint, request, jsonify, make_response, current_app, abort
-from app.models.model import User, Role, Permission, users_roles, Config, HelpCenter, Status, CenterType, Appointment, HelpCenterSchema, CenterTypeSchema, StatusSchema, AppointmentSchema, UserSchema
+from app.models.model import User, Role, Permission, users_roles, Config, HelpCenter, Status, CenterType, Appointment, HelpCenterSchema, CenterTypeSchema, StatusSchema, AppointmentSchema
 from app.extensions import db
-from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm, EditForm
+from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm, EditForm, HelpCenterForm
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy import or_
-import requests
-import math
-import decimal
-import datetime
-import json
+from os import path
+from werkzeug.utils import secure_filename
+import requests, math, decimal, datetime, json
 
 # Blueprint Administracion
 admin_bp = Blueprint('admin', __name__)
@@ -362,40 +360,139 @@ def ver_centro(id):
 @admin_bp.route('centro/crear', methods=['GET', 'POST'])
 @login_required
 def crear_centro():
-    results = []
-    response = requests.get(
-        'https://api-referencias.proyecto2020.linti.unlp.edu.ar/municipios').json()
 
-    per_page = response['per_page']
-    total = response['total']
+    id_admin = current_user.get_id()
+    if User.tiene_permiso(id_admin, 2):
 
-    for page in range(1, math.ceil(total/per_page)+1):
+        results = []
         response = requests.get(
-            'https://api-referencias.proyecto2020.linti.unlp.edu.ar/municipios', params={'page': page}).json()
-        data = response['data']
-        municipios = data['Town']
-        for v in municipios.values():
-            results.append((v['name']))
+            'https://api-referencias.proyecto2020.linti.unlp.edu.ar/municipios').json()
 
-    lista_municipios = sorted(results)
+        per_page = response['per_page']
+        total = response['total']
 
-    return render_template('admin/centro_edit.html', municipios=lista_municipios)
+        for page in range(1, math.ceil(total/per_page)+1):
+            response = requests.get(
+                'https://api-referencias.proyecto2020.linti.unlp.edu.ar/municipios', params={'page': page}).json()
+            data = response['data']
+            municipios = data['Town']
+            for v in municipios.values():
+                results.append((v['name']))
+
+        municipios_list = sorted(results)
+
+        # municipios_list = ['La Plata']
+        form = HelpCenterForm()
+        form.town.choices = municipios_list
+        tipos = CenterType.query.with_entities(CenterType.name_center_type).all()
+        tipos_lista = []
+        for tipo in tipos:
+            tipos_lista.append(tipo[0])
+        form.center_type.choices = tipos_lista
+        print (form.town.choices)
+        if form.validate_on_submit():
+            protocol_path = ""
+            if form.visit_protocol.data:
+                protocol_file = form.visit_protocol.data
+                filename_vp = secure_filename(protocol_file.filename)
+                protocol_ṕath= path.join(current_app.root_path, 'static/uploads', filename_vp)
+                protocol_file.save(protocol_ṕath)
+            help_center = HelpCenter(
+                name_center=form.name_center.data,
+                address=form.address.data,
+                phone=form.phone.data,
+                opening_time=form.opening_time.data,
+                close_time=form.close_time.data,
+                town=form.town.data,
+                web=form.web.data,
+                email=form.email.data,
+                visit_protocol=protocol_path,
+                status_id=1,
+                center_type_id=CenterType.query.filter_by(name_center_type=form.center_type.data).first().id,
+                latitude=form.latitude.data,
+                longitude=form.longitude.data
+                )        
+            # agrega nuevo centro a la db.
+            db.session.add(help_center)
+            db.session.commit()
+
+            # redirecciona a pagina login.
+            return redirect(url_for('admin.centros_ayuda'))
+            
+        return render_template('admin/centro_edit.html', form=form)
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
 
 @ admin_bp.route('centro/actualizar/<id>', methods=['GET', 'POST'])
 @ login_required
 def actualizar_centro(id):
 
-    # IMPLEMENTAR
+    id_admin = current_user.get_id()
+    if User.tiene_permiso(id_admin, 4):
 
-    return render_template('admin/centro_edit.html')
+        results = []
+        response = requests.get(
+            'https://api-referencias.proyecto2020.linti.unlp.edu.ar/municipios').json()
+
+        per_page = response['per_page']
+        total = response['total']
+
+        for page in range(1, math.ceil(total/per_page)+1):
+            response = requests.get(
+                'https://api-referencias.proyecto2020.linti.unlp.edu.ar/municipios', params={'page': page}).json()
+            data = response['data']
+            municipios = data['Town']
+            for v in municipios.values():
+                results.append((v['name']))
+
+        municipios_list = sorted(results)
+
+        # municipios_list = ['La Plata']
+        current_center = HelpCenter.query.filter_by(id=id).first()
+        form = HelpCenterForm(obj=current_center)
+        print(form.town.data)
+        print('111111111111111111111111')
+        form.town.choices = municipios_list
+        tipos = CenterType.query.with_entities(CenterType.name_center_type).all()
+        tipos_lista = []
+        print(form.town.data)
+        print('222222222222222222222222')
+        for tipo in tipos:
+            tipos_lista.append(tipo[0])
+        form.center_type.choices = tipos_lista
+
+        if form.validate_on_submit():
+            form.populate_obj(current_center)
+        db.session.commit()
+
+        return render_template('admin/centro_edit.html', form=form)
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
 
 @ admin_bp.route('centro/eliminar/<id>', methods=['GET', 'POST'])
 @ login_required
 def eliminar_centro(id):
 
-    # IMPLEMENTAR
+    id_admin = current_user.get_id()
+    if User.tiene_permiso(id_admin, 3):
+
+        center_delete = HelpCenter.query.filter_by(id=id).first()
+        if not center_delete:
+            flash('El centro de ayuda solicitado no existe.', 'danger')
+            return redirect(url_for('admin.centros_ayuda'))
+
+        db.session.delete(center_delete)
+        db.session.commit()
+
+        flash('El centro de ayuda se eliminó correctamente', 'success')
+        return redirect(url_for('admin.centros_ayuda'))
+    else:
+        flash('No tienes permisos para realizar esa acción.', 'danger')
+        return redirect(url_for('admin.index'))
 
     return 'Borrado de Centro de ayuda'
 
@@ -564,12 +661,12 @@ def api_centros():
         # Obtener todos los Centros de Ayuda #
 
         centers = HelpCenter.query.all()
-
+        
         # Serializar a JSON los Centros de Ayuda #
 
         help_center_schema = HelpCenterSchema(many=True)
         output = help_center_schema.dump(centers)
-
+        
         # Crear una respuesta HTTP 200 OK con el JSON de Centros de Ayuda #
 
         res = make_response(jsonify(output), 200, {

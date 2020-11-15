@@ -2,7 +2,8 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db
 from app.extensions import login_manager
-from app.extensions import ma
+#from app.extensions import ma
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 users_roles = db.Table('users_roles', db.Column('role_id', db.Integer, db.ForeignKey(
     'roles.id'), primary_key=True), db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True))
@@ -159,18 +160,18 @@ class Appointment(db.Model):
     appointment_date = db.Column(db.Date(), nullable=False)
     center_id = db.Column(db.Integer, db.ForeignKey('help_centers.id'))
 
-class HelpCenterSchema(ma.SQLAlchemyAutoSchema):
+class HelpCenterSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = HelpCenter
 
-class CenterTypeSchema(ma.SQLAlchemyAutoSchema):
+class CenterTypeSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = CenterType
 
-class StatusSchema(ma.SQLAlchemyAutoSchema):
+class StatusSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Status
 
-class AppointmentSchema(ma.SQLAlchemyAutoSchema):
+class AppointmentSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Appointment

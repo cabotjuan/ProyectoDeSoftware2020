@@ -1,6 +1,13 @@
 {% extends "admin/layout.html" %}
 {% block title %}Centros Ayuda GBA - Administracion - {{centro.name_center}} {% endblock %}
-
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+{% endblock %}
 {% block content %}
 
 <nav aria-label="breadcrumb">
@@ -82,7 +89,8 @@
                                         Ubicacion:
                                     </b>
                                     <div id="mapaFijo" style="height: 35vh" data-lat="{{centro.latitude}}"
-                                        data-lon="{{centro.longitude}}" data-info="{{centro.name_center}}({{centro.address}})">
+                                        data-lon="{{centro.longitude}}"
+                                        data-info="{{centro.name_center}}({{centro.address}})">
                                     </div>
                                 </td>
                             </tr>
@@ -96,6 +104,15 @@
         <div class="col-md-4 d-flex flex-column align-content-center justify-content-center">
             <div class="row">
                 <div class="col ">
+                    {% if centro.status_id == 3 %}
+                    <button class="btn btn-secondary btn-lg btn-block" disabled><i class="far fa-calendar-alt"></i> Ver
+                        Turnos</button>
+                    <button class="btn btn-secondary btn-lg btn-block" disabled><i class="far fa-calendar-alt"></i> <i
+                            class="fas fa-plus"></i> Nuevo Turno</button>
+
+                    <button class="btn btn-secondary btn-lg btn-block" disabled><i class="fas fa-edit" title="Editar"></i>
+                        Editar</button>
+                    {% else %}
                     <a href="{{ url_for('admin.turnos_centro', id=centro.id) }}"
                         class="btn btn-primary btn-lg btn-block"><i class="far fa-calendar-alt"></i> Ver Turnos</a>
                     <a href="{{ url_for('admin.crear_turno', id=centro.id) }}"
@@ -104,6 +121,7 @@
 
                     <a href="{{ url_for('admin.actualizar_centro', id=centro.id) }}"
                         class="btn btn-success btn-lg btn-block"><i class="fas fa-edit" title="Editar"></i> Editar</a>
+                    {% endif %}
                     <button type="button" class="btn btn-danger btn-lg btn-block" data-toggle="modal"
                         data-target="#centro-modal">
                         <i class="fas fa-trash-alt"></i> Eliminar

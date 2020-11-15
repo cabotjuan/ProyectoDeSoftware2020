@@ -147,7 +147,7 @@
                 <ul class="pagination pagination-sm justify-content-center">
                     {% if turnos.has_prev %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('admin.listar_usuarios', page=turnos.prev_num) }}"
+                        <a class="page-link" href="{{ url_for('admin.turnos', page=turnos.prev_num) }}"
                             tabindex="-1" aria-disabled="true">Anterior</a>
                     </li>
                     {% else %}

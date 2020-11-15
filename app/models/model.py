@@ -153,7 +153,7 @@ class Appointment(db.Model):
     __tablename__ ='appointments'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(60), index=True)
+    email = db.Column(db.String(60))
     start_time = db.Column(db.Time(), nullable=False)
     end_time = db.Column(db.Time(), nullable=False)
     appointment_date = db.Column(db.Date(), nullable=False)

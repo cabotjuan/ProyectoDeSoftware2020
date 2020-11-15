@@ -1,29 +1,37 @@
 {% extends "admin/layout.html" %}
-{% block title %}Centros Ayuda GBA - Administracion - Nuevo Turno{% endblock %}
-{% block head %}
-{{ super() }}
-{% endblock %}
-{% block navbar %}
 
+{% block title %} {{title}} {% endblock %}
+{% block head %}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js"></script>
+<script src="/static/turnos.js"></script>
 {% endblock %}
 {% block content %}
-
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.centros_ayuda') }}">Centros</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Actualizar Turno</li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.turnos') }}">Turnos</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Sacar turno</li>
     </ol>
 </nav>
-
 <form method="post" novalidate>
+    {{ form.hidden_tag() }}
     <div class="container-fluid">
         <div class="row d-flex justify-content-center">
             <div class="col-md-4 align-self-center">
-                {{ form.hidden_tag() }}
                 <div>
-                    <h3>{{ center_name }}</h3><hr>
+                    <h3>{{ center_name }}</h3>
+                    <hr>
                 </div>
+                {% if form.center_id %}
+                <div>
+                    {{ form.center_id.label }}
+                    {{ form.center_id(class="form-control", id="CentroSelect") }}<br>
+                    {% for error in form.center_id.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 <div>
                     {{ form.email.label }}
                     {{ form.email(class="form-control") }}<br>
@@ -32,43 +40,28 @@
                     {% endfor %}
                 </div>
                 <div>
-                    {{ form.start_time.label }}
-                    {{ form.start_time(class="form-control") }}<br>
-                    {% for error in form.start_time.errors %}
+                    {{ form.appointment_date.label }}
+                    {{ form.appointment_date(class="form-control", id="FechaTurno", data_centro=center_id) }}<br>
+                    {% for error in form.appointment_date.errors %}
                     <span style="color: red;">{{ error }}</span>
                     {% endfor %}
                 </div>
                 <div>
-                    {{ form.appointment_date.label }}
-                    {{ form.appointment_date(class="form-control") }}<br>
-                    {% for error in form.appointment_date.errors %}
+                    {{ form.start_time(class="form-control", id="HoraTurno",style="display:none;") }}<br>
+                    <div id="Turnos">
+                        <h6>Turnos Disponibles:</h6>
+                        <select class="form-control" name="TurnosDisponibles" id="TurnosDisponibles"></select>
+                    </div>
+                    {% for error in form.start_time.errors %}
                     <span style="color: red;">{{ error }}</span>
                     {% endfor %}
-                </div><hr>
+                </div>
+                <hr>
                 {{ form.submit(class='btn btn-lg btn-primary btn-block') }}
-                <a class="btn btn-lg btn-outline-secondary btn-block" href="{{ url_for('admin.listar_usuarios') }}">Cancelar</a>
+                <a class="btn btn-lg btn-outline-secondary btn-block"
+                    href="{{ url_for('admin.listar_usuarios') }}">Cancelar</a>
             </div>
         </div>
     </div>
 </form>
-
 {% endblock %}
-
-<!-- <div id="picker"></div>
-<script type="text/javascript">
-    (function ($) {
-        $('#picker').markyourcalendar({
-            availability: {{ horarios | safe }},
-    weekdays: ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'],
-        onClick: function (ev, data) {
-            // data is a list of datetimes
-            $.each(data, function () {
-                var d = this.split(' ')[0];
-                var t = this.split(' ')[1];
-                $('#selected-date').html(d);
-                $('#selected-time').html(t);
-            });
-        }
-        });
-    }) (jQuery);
-</script> -->

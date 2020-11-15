@@ -1,4 +1,4 @@
-from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm, EditForm, HelpCenterForm, AppointmentForm
+from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm, EditForm, HelpCenterForm, AppointmentForm, AppointmentWithCenterForm
 from flask import flash, redirect, session, render_template, url_for, Blueprint, request, jsonify, make_response, current_app, abort
 from app.models.model import User, Role, Permission, users_roles, Config, HelpCenter, Status, CenterType, Appointment, HelpCenterSchema, CenterTypeSchema, StatusSchema, AppointmentSchema
 from app.extensions import db
@@ -19,7 +19,6 @@ def index():
     """
         Renderizar la pagina principal de la administracion.
     """
-    print(current_app.config['UPLOAD_FOLDER'])
     return render_template('admin/index.html')
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -626,7 +625,7 @@ def turnos_centro(id,page=1):
 
 
 @ admin_bp.route('centro/turnos/crear', methods=['GET', 'POST'])
-@admin_bp.route('centro/<id>/turnos/crear', methods=['GET', 'POST'])
+@admin_bp.route('centro/<int:id>/turnos/crear', methods=['GET', 'POST'])
 @login_required
 def crear_turno(id=0):
     """
@@ -636,16 +635,36 @@ def crear_turno(id=0):
     """
     id_usuario = current_user.get_id()
     if User.tiene_permiso(id_usuario, 12):
-        centro = HelpCenter.query.get(id)
-        centro_nombre = centro.name_center
-        form = AppointmentForm()
 
+        # Si recibe Id por paremetro no es necesario seleccionar el Centro. Sino, mostrar Selector de centros.
+        if id>0:
+            centro = HelpCenter.query.get(id)
+            centro_nombre = centro.name_center
+            form = AppointmentForm()
+        else:
+            form = AppointmentWithCenterForm()
+            centros_ayuda_aceptados = HelpCenter.query.filter_by(status_id = 1).with_entities(HelpCenter.id,HelpCenter.name_center).all()
+            form.center_id.choices = centros_ayuda_aceptados
+            centro_nombre = ''
         #POST
         if form.validate_on_submit():
-            appointment = Appointment(
-                email=form.email.data,
-                start_time=form.start_time.data,
-                appointment_date=form.appointment_date.data)
+
+            if id>0:
+                appointment = Appointment(
+                    email=form.email.data,
+                    start_time=form.start_time.data,
+                    appointment_date=form.appointment_date.data,
+                    center_id = id
+                    )
+            else:
+                appointment = Appointment(
+                    email=form.email.data,
+                    start_time=form.start_time.data,
+                    appointment_date=form.appointment_date.data,
+                    center_id = form.center_id.data
+                    )
+                centro = HelpCenter.query.get(form.center_id.data)
+
             delta = datetime.timedelta(minutes=30)
             start = appointment.start_time
             appointment.end_time = (datetime.datetime.combine(datetime.date(1,1,1),start) + delta).time()
@@ -654,15 +673,15 @@ def crear_turno(id=0):
             if not turnos_del_dia:
                 centro.appointments.append(appointment)
                 db.session.commit()
+                # redirecciona a pagina turnos del dia del centro
+                # return redirect(url_for('admin.turnos_centro({})'.format(id)))
+                flash('Turno creado exitosamente', 'success')
+                return redirect(url_for('admin.index'))
             else:
                 flash('Turno no disponible', 'danger')
-                return render_template('admin/turno_create.html', form=form, center_name=centro_nombre, title='Centros de Ayuda GBA - Sacar turno')
+                return render_template('admin/turno_edit.html', form=form, center_name=centro_nombre, center_id=id, title='Centros de Ayuda GBA - Sacar turno')
 
-            # redirecciona a pagina turnos del dia del centro
-            # return redirect(url_for('admin.turnos_centro({})'.format(id)))
-            flash('Turno creado exitosamente', 'success')
-            return redirect(url_for('admin.index'))
-        return render_template('admin/turno_create.html', form=form, center_name=centro_nombre, title='Centros de Ayuda GBA - Sacar turno')
+        return render_template('admin/turno_edit.html', form=form, center_name=centro_nombre, center_id=id, title='Centros de Ayuda GBA - Sacar turno')
     else:
         flash('No tienes permisos para realizar esa acción', 'danger')
         return redirect(url_for('admin.index'))
@@ -702,7 +721,7 @@ def actualizar_turno(id):
             else:
                 flash('Turno no disponible', 'danger')
                 return render_template('admin/turno_edit.html', form=form, center_name=centro_nombre, title='Centros de Ayuda GBA - Actualizar turno')
-        return render_template('admin/turno_edit.html', form=form, center_name=centro_nombre, title='Centros de Ayuda GBA - Actualizar turno')
+        return render_template('admin/turno_edit.html', form=form, center_name=centro_nombre, center_id=centro.id, title='Centros de Ayuda GBA - Actualizar turno')
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
         return redirect(url_for('admin.index'))
@@ -841,7 +860,7 @@ def api_centro(centro_id):
      
 
 
-@ admin_bp.route('/centros/<centro_id>/turnos_disponibles/', methods=["GET"])
+@ admin_bp.route('/centros/<centro_id>/turnos_disponibles', methods=["GET"])
 def api_centro_turnos(centro_id):
 
     """
@@ -850,9 +869,14 @@ def api_centro_turnos(centro_id):
          Method GET:
              Este servicio permite obtener el listado de los turnos disponibles
              para UN centro de ayuda en un dia en particular
+        Parametros:
+            ID del centro
+        Query String:
+            fecha: YY-MM-DD (ej:2020-12-01)
 
     """
-
+    if not HelpCenter.query.filter_by(id=centro_id).first(): abort(404)
+        
     data = {}
     data['turnos'] = []
     delta = datetime.timedelta(minutes=30)
@@ -870,7 +894,7 @@ def api_centro_turnos(centro_id):
                     datetime.time(14),datetime.time(14,30),
                     datetime.time(15),datetime.time(15,30)]
     # Filtro los turnos del dia del centro recibido
-    turnos_del_dia = Appointment.query.filter_by(center_id=centro_id,appointment_date=date)
+    turnos_del_dia = Appointment.query.filter_by(center_id=centro_id,appointment_date=date).all()
     for turno in turnos_del_dia:
         todos_los_turnos.remove(turno.start_time)
     for turno in todos_los_turnos:
@@ -886,19 +910,61 @@ def api_centro_turnos(centro_id):
     
     res = make_response(a, 200, {
         'Content-Type': 'application/json; charset=utf-8'})
-    
+
     return res
 
 
 @ admin_bp.route('/centros/<centro_id>/reserva', methods=["POST"])
 def api_centro_reserva(centro_id):
+    """
+         API endpoint: /centros/<centro_id>/reserva
 
-    # IMPLEMENTAR
-    # API
+         Method POST:
+             Este servicio permite realizar una reserva de un turno para un centro de ayuda
+             en un dia en particular
+         Parametros:
+            ID del Centro
 
-    return 'response'
+    """
+    try:
+        data = request.get_json()
+        center_accepted = HelpCenter.query.filter_by(id=centro_id).filter_by(status_id=1).first()
+        
+        opening_center = HelpCenter.query.filter_by(id=centro_id).first().opening_time
+        close_center = HelpCenter.query.filter_by(id=centro_id).first().close_time
 
+        request_start = datetime.datetime.strptime(data["start_time"], '%H:%M').time()
+        request_end = datetime.datetime.strptime(data["end_time"], '%H:%M').time()
 
-#  TESTING ROUTES #
+        appointment_start = request_start
+        appointment_end = request_end
 
-# ... #
+        exists = Appointment.query.filter_by(center_id=centro_id).filter_by(appointment_date=data["appointment_date"]).filter_by(start_time=data["start_time"]).first()
+        
+
+        if not center_accepted:
+            raise Exception("El centro de ayuda no está disponible.")
+        if not (appointment_start >= opening_center and appointment_end <= close_center):
+            raise Exception("El horario solicitado está fuera del rango del horario de atención.")
+        correct_end=(datetime.datetime.combine(datetime.date(1,1,1),request_start)+datetime.timedelta(minutes=30)).time()
+        if not (correct_end == request_end):
+            raise Exception("Los bloques deben ser de 30 minutos.")
+        if exists:
+            raise Exception("El turno solicitado ya está reservado.")
+        appointment = Appointment(**{k: data[k] for k in("email",
+            "start_time",
+            "end_time",
+            "appointment_date",
+            "center_id"
+        ) if k in data})
+
+        db.session.add(appointment)
+        db.session.commit()
+        res = make_response(jsonify(data), 201, {
+                        'Content-Type': 'application/json; charset=utf-8'})
+
+    except Exception as err:
+        res = make_response(
+            jsonify({"mensaje": str(err)}), 400)
+
+    return res

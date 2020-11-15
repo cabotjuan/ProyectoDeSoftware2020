@@ -1,0 +1,153 @@
+{% extends "admin/layout.html" %}
+{% block title %}Centros Ayuda GBA - Administracion - Listado de Centros de Ayuda{% endblock %}
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+crossorigin=""></script>
+{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0 shadow-color-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.centros_ayuda') }}">Centros de ayuda</a></li>
+        {% if edit_mode %}
+        <li class="breadcrumb-item active" aria-current="page">Actualizar </li>
+        {% else %}
+        <li class="breadcrumb-item active" aria-current="page">Agregar</li>
+        {% endif%}
+    </ol>
+</nav>
+
+<form method="post" novalidate enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="container-fluid">
+        <div class="row p-4 bg-color-3 text-white">
+            <div class="col-md-2 d-flex flex-column align-items-center">
+                <div class="logo-centros">
+                    <img src="/static/img/Center3.png" class="card-img-top" alt="configuracion">
+                </div>
+            </div>
+            <div class="col-md d-flex flex-column align-items-start">
+                <h1 class="text-center">Centros de Ayuda</h1>
+                {% if edit_mode %}
+                <h3 class="text-center font-weight-light">Actualizar centro</h3>
+                {% else %}
+                <h3 class="text-center font-weight-light">Agregar centro</h3>
+                {% endif%}
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center mt-4">
+            <div class="col-md-4 d-flex flex-column align-content-start">
+                <div>
+                    {{ form.name_center.label }}
+                    {{ form.name_center(class="form-control") }}<br>
+                    {% for error in form.name_center.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.address.label }}
+                    {{ form.address(class="form-control") }}<br>
+                    {% for error in form.address.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.phone.label }}
+                    {{ form.phone(class="form-control") }}<br>
+                    {% for error in form.phone.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.opening_time.label }}
+                    {{ form.opening_time(class="form-control") }}<br>
+                    {% for error in form.opening_time.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.close_time.label }}
+                    {{ form.close_time(class="form-control") }}<br>
+                    {% for error in form.close_time.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div class="mb-3">
+                    {{ form.town.label }} <br>
+                    {{ form.town(class="form-control", id="municipios", data_value=form.town.data) }}
+                    {% for error in form.town.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.web.label }}
+                    {{ form.web(class="form-control") }}<br>
+                    {% for error in form.web.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4 d-flex flex-column align-content-start">
+                <div>
+                    {{ form.email.label }}
+                    {{ form.email(class="form-control") }}<br>
+                    {% for error in form.email.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.visit_protocol.label }}
+                    {{ form.visit_protocol(class="form-control-file") }}<br>
+                    Actual:
+                    {{ current_protocol }}
+                    {% for error in form.visit_protocol.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div class="mb-3">
+                    {{ form.center_type_id.label }} <br>
+                    {{ form.center_type_id(class="form-control", id="tiposcentro", data_centro=form.center_type_id.data) }}
+                    {% for error in form.center_type_id.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.latitude.label }}
+                    {{ form.latitude(class="form-control", id="latitude") }}<br>
+                    {% for error in form.latitude.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.longitude.label }}
+                    {{ form.longitude(class="form-control", id="longitude") }}<br>
+                    {% for error in form.longitude.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div id="mapid"></div>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center mt-4">
+            <div class="col-md-6  d-flex flex-column align-content-center justify-content-center">
+
+                <hr>
+                {{ form.submit(class='btn btn-lg btn-primary m-1') }}
+                <a class="btn btn-lg btn-outline-secondary m-1 "
+                    href="{{ url_for('admin.centros_ayuda') }}">Cancelar</a>
+                <hr>
+            </div>
+        </div>
+    </div>
+    <script src="/static/select2init.js"></script>
+    <script src="/static/mapa.js"></script>
+
+</form>
+
+{% endblock %}

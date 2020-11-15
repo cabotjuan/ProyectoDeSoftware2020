@@ -112,3 +112,4 @@ coc-settings.json
 .vscode
 
 migrations/
+app/static/uploads/

@@ -4,10 +4,10 @@ from flask_session import Session
 from flask_migrate import Migrate
 from config import config
 from .extensions import db
+from .extensions import ma
 from .extensions import login_manager
 from app.admin.resources.views import admin_bp as admin_blueprint
 from app.admin.helpers import handler
-
 
 def create_app(environment="development"):
     # Configuración inicial de la app
@@ -18,6 +18,12 @@ def create_app(environment="development"):
     login_manager.login_message = "Debes estar autenticado para ver esta pagina."
     login_manager.login_message_category = "danger"
     login_manager.login_view = "admin.login"
+
+    # Configuracion file_upload
+    app.config["UPLOAD_FOLDER"] = 'static/uploads'
+    app.config["ALLOWED_EXTENSIONS"] = ["pdf"]
+    app.config["MAX_CONTENT_LENGTH"] = 1000 * 1024  # 1mb
+
 
     # Carga de la configuración
     env = environ.get("FLASK_ENV", environment)
@@ -34,7 +40,7 @@ def create_app(environment="development"):
         conf["DB_HOST"]+"/"+conf["DB_NAME"]
 
     db.init_app(app)
-
+    ma.init_app(app)
     # Handlers
     app.register_error_handler(404, handler.not_found_error)
     app.register_error_handler(401, handler.unauthorized_error)

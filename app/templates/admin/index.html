@@ -7,27 +7,45 @@
 
 {% endblock %}
 {% block content %}
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h1 class="display-4">Administracion</h1>
+<div class="jumbotron jumbotron-fluid bg-color-3 ">
+    <div class="container ">
+        <h1 class="display-4 text-light text-center text-white">Administración</h1>
     </div>
 </div>
 
 <div class="container-fluid">
     <div class="row">
         <div class="col-md mb-1 d-flex justify-content-center">
-            <div class="card text-center text-white w-50 bg-color-1">
+            <div class="card text-center text-white w-75 bg-color-1">
                 <img src="../../static/img/Users.png" class="card-img-top" alt="Usuarios">
                 <div class="card-body">
-                    <h5 class="card-title"><a href="{{ url_for('admin.listar_usuarios') }}" class="stretched-link">Usuarios</a></h5>
+                    <h5 class="card-title"><a href="{{ url_for('admin.listar_usuarios') }}"
+                            class="stretched-link">Usuarios</a></h5>
                 </div>
             </div>
         </div>
         <div class="col-md mb-1 d-flex justify-content-center">
-            <div class="card text-center text-white w-50 bg-color-1">
+            <div class="card text-center text-white w-75 bg-color-1">
+                <img src="../../static/img/Center3.png" class="card-img-top" alt="configuracion">
+                <div class="card-body">
+                    <h5 class="card-title"><a href="{{ url_for('admin.centros_ayuda')}}" class="stretched-link">Centros de ayuda</a></h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md mb-1 d-flex justify-content-center">
+            <div class="card text-center text-white w-75 bg-color-1">
+                <img src="../../static/img/turnos.png" class="card-img-top" alt="configuracion">
+                <div class="card-body">
+                    <h5 class="card-title"><a href="{{ url_for('admin.turnos') }}" class="stretched-link">Turnos</a></h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md mb-1 d-flex justify-content-center">
+            <div class="card text-center text-white w-75 bg-color-1">
                 <img src="../../static/img/Settings.png" class="card-img-top" alt="configuracion">
                 <div class="card-body">
-                    <h5 class="card-title"><a href="{{ url_for('admin.configuracion') }}" class="stretched-link">Configuración</a></h5>
+                    <h5 class="card-title"><a href="{{ url_for('admin.configuracion') }}"
+                            class="stretched-link">Configuración</a></h5>
                 </div>
             </div>
         </div>

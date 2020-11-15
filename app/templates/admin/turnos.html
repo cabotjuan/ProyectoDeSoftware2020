@@ -1,0 +1,209 @@
+{% extends "admin/layout.html" %}
+{% block title %}Centros Ayuda GBA - Administracion - Turnos{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block navbar %}
+
+{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0 shadow-color-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Administracion</a></li>
+        {% if centro %}
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.ver_centro', id=centro.id) }}">{{centro.name_center}}</a>
+        </li>
+        {% endif %}
+        <li class="breadcrumb-item active" aria-current="page">Turnos</li>
+    </ol>
+</nav>
+
+<div class="container-fluid">
+    <div class="row p-4 bg-color-3 text-white">
+        <div class="col-md d-inline-flex flex-row align-items-center justify-content-start">
+            <div class="logo-centros">
+                <img src="/static/img/turnos.png" class="card-img-top w-75" alt="configuracion">
+            </div>
+            {% if not centro %}
+            <h1 class="text-center font-weight-light"> Turnos</h1>
+            {% else %}
+            <h1 class="text-center font-weight-light"> Turnos en <b>{{ centro.name_center}}</b></h1>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row bg-color-1 shadow-color-3">
+        <div class="col d-flex justify-content-start align-items-center p-2">
+            {% if not centro %}
+            <form action="{{ url_for('admin.turnos_buscar') }}" method="POST">
+                {% else %}
+                <form action="{{ url_for('admin.turnos_centro_buscar', id=centro.id) }}" method="POST">
+                    {% endif %}
+                    <div class="input-group mb-3">
+                        <div class="search-box d-inline-flex">
+                            {% if search_name %}
+                            <input type="search" class="form-control" name="buscar-nombre"
+                                placeholder="Buscar nombre..." aria-label="buscar por nombre"
+                                aria-describedby="buscar-boton" value="{{search_name}}">
+                            {% else %}
+                            <input type="search" class="form-control" name="buscar-nombre"
+                                placeholder="Buscar nombre..." aria-label="buscar por nombre"
+                                aria-describedby="buscar-boton">
+                            {% endif %}
+                        </div>
+                        <div class="search-box d-inline-flex">
+                            {% if search_date %}
+                            <input type="date" class="form-control" name="buscar-fecha" placeholder="Filtrar por Fecha"
+                                aria-label="buscar por fecha" aria-describedby="buscar-boton" value="{{search_date}}">
+                            {% else %}
+                            <input type="date" class="form-control" name="buscar-fecha" placeholder="Filtrar por Fecha"
+                                aria-label="buscar por fecha" aria-describedby="buscar-boton">
+                            {% endif %}
+                        </div>
+
+                        <div class="input-group-append">
+                            <button class="btn btn-secondary" type="submit" id="buscar-boton"><i
+                                    class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+
+                </form>
+        </div>
+        <div class="col d-flex justify-content-end p-2">
+            <div>
+                <a class="btn-success btn" href="{{ url_for('admin.crear_turno') }}">Nuevo turno <i
+                        class="fas fa-plus"></i> </a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover table-light table-striped">
+                <thead>
+                    <tr>
+                        {% if not centro %}
+                        <th scope="col">Centro de Ayuda</th>
+                        {% endif %}
+                        <th scope="col">Email Solicitante</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Hora</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if not turnos.items %}
+                    <div class="alert alert-warning" role="alert">
+                        No se encontraron resultados.
+                    </div>
+                    {% else %}
+
+                    {% for turno in turnos.items %}
+                    {% if not centro %}
+                    <td>{{ turno.help_centers.name_center }}</td>
+                    {% endif %}
+                    <td>{{ turno.email }}</td>
+                    <td>{{ turno.appointment_date }}</td>
+                    <td>{{ turno.start_time.strftime('%H:%M') }} - {{ turno.end_time.strftime('%H:%M') }} </td>
+                    <td>
+                        <a href="{{ url_for('admin.actualizar_turno', id=turno.id) }}"><i
+                                class="fas fa-edit text-success" title="Editar"></i></a>
+
+                        <a><i class="fas fa-trash-alt text-danger" title="Eliminar" data-toggle="modal"
+                                data-target="#modal-turno{{turno.id}}"></i></a>
+
+                        <div id="modal-turno{{turno.id}}" class="modal fade bd-example-modal-sm" tabindex="-1"
+                            role="dialog" aria-labelledby="modal-turno{{turno.id}}-title" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modal-turno{{turno.id}}-title">Eliminar turno
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        ¿Estás seguro que deseas eliminar el turno de <b>{{ turno.email }}</b> ?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
+                                            aria-label="Cancelar">Cancelar</button>
+                                        <a class="btn btn-danger"
+                                            href="{{ url_for('admin.eliminar_turno', id=turno.id) }}"
+                                            aria-label="Borrar">Borrar</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    </tr>
+
+                    {% endfor %}
+                </tbody>
+                {% endif %}
+            </table>
+        </div>
+        <div class="col">
+            <nav aria-label="Paginas de listado de turnos">
+                <ul class="pagination pagination-sm justify-content-center">
+                    {% if turnos.has_prev %}
+                    <li class="page-item">
+                        {% if '/administracion/turnos/buscar' in request.path  %}
+                        <a class="page-link" href="{{ url_for('admin.turnos_buscar', page=turnos.prev_num) }}"
+                        tabindex="-1" aria-disabled="true">Anterior</a>
+                        {% else %}
+                        <a class="page-link" href="{{ url_for('admin.turnos', page=turnos.prev_num) }}" tabindex="-1"
+                            aria-disabled="true">Anterior</a>
+                        {% endif %}
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                    </li>
+
+                    {% endif %}
+
+                    <!-- all page numbers -->
+                    {% for page_num in turnos.iter_pages() %}
+                    {% if page_num %}
+                    {% if page_num != turnos.page %}
+                    <li class="page-item">
+                        {% if '/administracion/turnos/buscar' in request.path %}
+                        <a class="page-link" href="{{ url_for('admin.turnos_buscar', page=page_num) }}">{{ page_num }}</a>
+                        {% else %}
+                        <a class="page-link" href="{{ url_for('admin.turnos', page=page_num) }}">{{ page_num }}</a>
+                        {% endif %}
+                    </li>
+                    {% else %}
+                    <li class="page-item active">
+                        <a class="page-link" href="#">{{ page_num }}</a>
+                    </li>
+                    {% endif %}
+                    {% else %}
+                    <li class="page-item">
+                        <span class="ellipsis"
+                            style="white-space; nowrap; overflow: hidden; text-overflow: ellipsis">…</span>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    <!-- next page -->
+                    {% if turnos.has_next %}
+                    <li class="page-item">
+                        {% if '/administracion/turnos/buscar' in request.path %}
+                        <a class="page-link" href="{{ url_for('admin.turnos_buscar', page=turnos.next_num) }}">Siguiente</a>
+                        {% else %}
+                        <a class="page-link" href="{{ url_for('admin.turnos', page=turnos.next_num) }}">Siguiente</a>
+                        {% endif %}
+                    </li>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#">Siguiente</a></li>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

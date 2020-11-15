@@ -23,6 +23,20 @@ body {
     background-color: #fafafa;
 }
 
+.bg-color-3 {
+    background-color: #4dbace;
+}
+
+.shadow-color-3 {
+    box-shadow: 0px 45px 40px 0px inset #4dbace;
+}
+
+.shadow-color-4 {
+    background-color: #fafafa;
+    box-shadow: 0px -10px 35px -15px inset #979797;
+}
+
+
 /*      HEADER STYLES      */
 
 .nav-link {
@@ -49,6 +63,10 @@ body {
 
 .main-content {
     min-height: 100vh;
+}
+
+.w100important{
+    width: 100%!important;
 }
 
 .form-login {
@@ -82,11 +100,14 @@ thead {
 
 .search-box {
     min-width: 200px;
+    max-width: 200px;
 }
 
-.justify-user-options {
-    justify-content: end;
+.logo-centros {
+    display: block;
+    max-width: 135px;
 }
+
 
 /*      FOOTER STYLES      */
 
@@ -112,4 +133,8 @@ footer {
     .justify-user-options {
         justify-content: center;
     }
+}
+
+#mapid {
+    height: 180px;
 }

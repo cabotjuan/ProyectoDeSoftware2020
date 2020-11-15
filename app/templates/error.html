@@ -9,9 +9,14 @@
 </head>
 
 <body>
-    <h1>{{ error_name }}</h1>
-    <p class="zoom-area"><b> Error: </b> {{ error_description }}<br>
-        <button class="inicio"><a href="{{ url_for('admin.index') }}">Inicio</a></button></p>
+    <div class="container">
+        <h1 style="font-weight: lighter;">{{ error_name }}</h1>
+        <div class="logo">
+            <img src="/static/img/Logo.png" alt="">
+        </div>
+        <p class="zoom-area"><b> Error: </b> {{ error_description }}<br>
+            <a class="inicio" href="{{ url_for('admin.index') }}">Acceder a Administración</a></p>
+    </div>
 </body>
 
 </html>

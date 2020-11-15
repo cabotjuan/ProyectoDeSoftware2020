@@ -557,7 +557,7 @@ def turnos(page=1):
 
 
 @ admin_bp.route('turnos/buscar', methods=['GET', 'POST'])
-@ admin_bp.route('turnos/<int:page>/buscar/', methods=['GET', 'POST'])
+@ admin_bp.route('turnos/buscar/<int:page>', methods=['GET', 'POST'])
 @ login_required
 def turnos_buscar(page=1):
     search_name = request.form.get('buscar-nombre')
@@ -676,7 +676,7 @@ def crear_turno(id=0):
                 # redirecciona a pagina turnos del dia del centro
                 # return redirect(url_for('admin.turnos_centro({})'.format(id)))
                 flash('Turno creado exitosamente', 'success')
-                return redirect(url_for('admin.index'))
+                return redirect(url_for('admin.turnos'))
             else:
                 flash('Turno no disponible', 'danger')
                 return render_template('admin/turno_edit.html', form=form, center_name=centro_nombre, center_id=id, title='Centros de Ayuda GBA - Sacar turno')
@@ -717,7 +717,7 @@ def actualizar_turno(id):
                 db.session.commit()
                 # redirecciona al listado de usuarios
                 flash('Los cambios se guardaron correctamente.', 'success')
-                return redirect(url_for('admin.index'))
+                return redirect(url_for('admin.turnos'))
             else:
                 flash('Turno no disponible', 'danger')
                 return render_template('admin/turno_edit.html', form=form, center_name=centro_nombre, title='Centros de Ayuda GBA - Actualizar turno')

@@ -113,3 +113,4 @@ coc-settings.json
 
 migrations/
 app/static/uploads/
+!app/static/uploads/.keep

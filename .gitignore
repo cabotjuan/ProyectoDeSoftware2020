@@ -112,5 +112,5 @@ coc-settings.json
 .vscode
 
 migrations/
-app/static/uploads/
+app/static/uploads/*
 !app/static/uploads/.keep

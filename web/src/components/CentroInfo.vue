@@ -1,7 +1,7 @@
 <template>
   <div class="centro-informacion">
     [---CENTROINFO COMPONENT----]
-    <h3>{{ msg }}...</h3>
+    <h5>{{ msg }}...</h5>
     <br>
     <a href="">ir a sacar un turno para el centro elegido</a>
     <br>

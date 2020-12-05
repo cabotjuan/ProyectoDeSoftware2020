@@ -11,10 +11,6 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    // Cualquier otra Ruta va a 404.
-    path: '*'
-  },
-  {
     path: '/',
     name: 'Home',
     component: Home

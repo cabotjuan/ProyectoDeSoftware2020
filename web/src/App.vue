@@ -135,9 +135,9 @@ export default {
 }
 .footer-info-container1 .col{
   display: flex;
-  justify-content: start;
+  justify-content: flex-start;
   flex-direction: column;
-  align-items: start;
+  align-items: flex-start;
 }
 .footer-info-container2{
   flex-direction: column;

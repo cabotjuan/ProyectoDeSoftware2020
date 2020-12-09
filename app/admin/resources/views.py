@@ -7,7 +7,14 @@ from sqlalchemy import or_
 from os import path
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import CombinedMultiDict
-import requests, math, decimal, datetime, json
+import requests
+import math
+import decimal
+import datetime
+import json
+import re
+from email_validator import validate_email, EmailNotValidError
+
 
 # Blueprint Administracion
 admin_bp = Blueprint('admin', __name__)
@@ -24,6 +31,7 @@ def index():
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # AUTH ROUTES #
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -61,6 +69,7 @@ def logout():
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # USER ROUTES #
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 @admin_bp.route('/usuarios/registrar/', methods=['GET', 'POST'])
 @login_required
@@ -319,6 +328,7 @@ def eliminar_usuario(id):
 # CRUD CENTROS DE AYUDA #
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
 @admin_bp.route('listado_centros/', methods=['GET', 'POST'])
 @admin_bp.route('listado_centros/<int:page>/', methods=['GET', 'POST'])
 @login_required
@@ -384,13 +394,15 @@ def crear_centro():
 
         form = HelpCenterForm()
         form.town.choices = municipios_list
-        form.center_type_id.choices = CenterType.query.with_entities(CenterType.id,CenterType.name_center_type ).all()
+        form.center_type_id.choices = CenterType.query.with_entities(
+            CenterType.id, CenterType.name_center_type).all()
         if form.validate_on_submit():
             protocol_path = ""
             if form.visit_protocol.data:
                 protocol_file = form.visit_protocol.data
                 filename_vp = secure_filename(protocol_file.filename)
-                protocol_path= path.join(current_app.root_path, 'static/uploads', filename_vp)
+                protocol_path = path.join(
+                    current_app.root_path, 'static/uploads', filename_vp)
                 protocol_file.save(protocol_path)
             help_center = HelpCenter(
                 name_center=form.name_center.data,
@@ -406,14 +418,14 @@ def crear_centro():
                 center_type_id=form.center_type_id.data,
                 latitude=form.latitude.data,
                 longitude=form.longitude.data
-                )        
+            )
             # agrega nuevo centro a la db.
             db.session.add(help_center)
             db.session.commit()
 
             # redirecciona a pagina login.
             return redirect(url_for('admin.centros_ayuda'))
-            
+
         return render_template('admin/centro_edit.html', form=form)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
@@ -449,7 +461,8 @@ def actualizar_centro(id):
         current_protocol_name = str(current_protocol).split('/')[-1:][0]
         form = HelpCenterForm(obj=current_center)
         form.town.choices = municipios_list
-        form.center_type_id.choices = CenterType.query.with_entities(CenterType.id, CenterType.name_center_type).all()
+        form.center_type_id.choices = CenterType.query.with_entities(
+            CenterType.id, CenterType.name_center_type).all()
         if form.validate_on_submit():
             if form.visit_protocol.data != current_protocol:
                 protocol_file = form.visit_protocol.data
@@ -514,7 +527,7 @@ def rechazar_centro(id):
     if User.tiene_permiso(id_admin, 4):
         centro = HelpCenter.query.filter_by(id=id).first().status_id = 3
         db.session.commit()
-        flash('Centro Rechazado','success')
+        flash('Centro Rechazado', 'success')
         return redirect(url_for('admin.centros_ayuda'))
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
@@ -523,6 +536,7 @@ def rechazar_centro(id):
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #  CRUD TURNOS #
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 @ admin_bp.route('turnos/', methods=['GET', 'POST'])
 @ admin_bp.route('turnos/<int:page>', methods=['GET', 'POST'])
@@ -539,9 +553,9 @@ def turnos(page=1):
     if User.tiene_permiso(id_usuario, 1):
         fecha_hoy = datetime.datetime.today().strftime('%Y-%m-%d')
         fecha_man = (datetime.datetime.today() +
-                    datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+                     datetime.timedelta(days=1)).strftime('%Y-%m-%d')
         fecha_pas = (datetime.datetime.today() +
-                    datetime.timedelta(days=2)).strftime('%Y-%m-%d')
+                     datetime.timedelta(days=2)).strftime('%Y-%m-%d')
 
         turnos_hoy = Appointment.query.filter_by(appointment_date=fecha_hoy)
         turnos_man = Appointment.query.filter_by(appointment_date=fecha_man)
@@ -571,7 +585,7 @@ def turnos_buscar(page=1):
             help_centers_ids = [value for value, in results]
             turnos = Appointment.query.filter(
                 Appointment.center_id.in_(help_centers_ids)).union(Appointment.query.filter(Appointment.email.contains(search_name)))
-            
+
             if search_date:
                 turnos = turnos.filter_by(
                     appointment_date=search_date)
@@ -588,10 +602,11 @@ def turnos_buscar(page=1):
         flash('No tienes permisos para realizar esa acción.', 'danger')
         return redirect(url_for('admin.index'))
 
+
 @ admin_bp.route('turnos/buscar/centro/<id>', methods=['GET', 'POST'])
 @ admin_bp.route('turnos/buscar/centro/<id>/<int:page>', methods=['GET', 'POST'])
 @ login_required
-def turnos_centro_buscar(id,page=1):
+def turnos_centro_buscar(id, page=1):
     search_date = request.form.get('buscar-fecha')
     search_name = request.form.get('buscar-nombre')
     id_usuario = current_user.get_id()
@@ -602,7 +617,7 @@ def turnos_centro_buscar(id,page=1):
         if search_name:
             turnos = turnos.filter(Appointment.email.contains(search_name))
         if search_date:
-            turnos=turnos.filter_by(
+            turnos = turnos.filter_by(
                 appointment_date=search_date)
         turnos = turnos.paginate(page, per_page=usuarios_por_pag)
         return render_template('admin/turnos.html', turnos=turnos, search_date=search_date, search_name=search_name, centro=centro)
@@ -610,14 +625,16 @@ def turnos_centro_buscar(id,page=1):
         flash('No tienes permisos para realizar esa acción.', 'danger')
         return redirect(url_for('admin.index'))
 
+
 @ admin_bp.route('centro/<id>/turnos', methods=['GET', 'POST'])
 @ login_required
-def turnos_centro(id,page=1):
+def turnos_centro(id, page=1):
     id_usuario = current_user.get_id()
     usuarios_por_pag = Config.query.first().n_elements
     centro = HelpCenter.query.filter_by(id=id).first()
     if User.tiene_permiso(id_usuario, 1):
-        turnos = Appointment.query.filter_by(center_id = centro.id).paginate(page, per_page=usuarios_por_pag)
+        turnos = Appointment.query.filter_by(
+            center_id=centro.id).paginate(page, per_page=usuarios_por_pag)
         return render_template('admin/turnos.html', turnos=turnos, centro=centro)
     else:
         flash('No tienes permisos para realizar esa acción.', 'danger')
@@ -637,46 +654,55 @@ def crear_turno(id=0):
     if User.tiene_permiso(id_usuario, 12):
 
         # Si recibe Id por paremetro no es necesario seleccionar el Centro. Sino, mostrar Selector de centros.
-        if id>0:
+        if id > 0:
             centro = HelpCenter.query.get(id)
             centro_nombre = centro.name_center
             form = AppointmentForm()
         else:
             form = AppointmentWithCenterForm()
-            centros_ayuda_aceptados = HelpCenter.query.filter_by(status_id = 1).with_entities(HelpCenter.id,HelpCenter.name_center).all()
+            centros_ayuda_aceptados = HelpCenter.query.filter_by(
+                status_id=1).with_entities(HelpCenter.id, HelpCenter.name_center).all()
             form.center_id.choices = centros_ayuda_aceptados
             centro_nombre = ''
-        #POST
+        # POST
         if form.validate_on_submit():
 
-            if id>0:
+            if id > 0:
                 appointment = Appointment(
                     email=form.email.data,
+                    first_name=form.first_name.data,
+                    last_name=form.last_name.data,
+                    phone=form.phone.data,
                     start_time=form.start_time.data,
                     appointment_date=form.appointment_date.data,
-                    center_id = id
-                    )
+                    center_id=id
+                )
             else:
                 appointment = Appointment(
                     email=form.email.data,
+                    first_name=form.first_name.data,
+                    last_name=form.last_name.data,
+                    phone=form.phone.data,
                     start_time=form.start_time.data,
                     appointment_date=form.appointment_date.data,
-                    center_id = form.center_id.data
-                    )
+                    center_id=form.center_id.data
+                )
                 centro = HelpCenter.query.get(form.center_id.data)
 
             delta = datetime.timedelta(minutes=30)
             start = appointment.start_time
-            appointment.end_time = (datetime.datetime.combine(datetime.date(1,1,1),start) + delta).time()
-            # Me trae el turno del centro recibido, con esa fecha y esa hora de inicio 
-            turnos_del_dia = Appointment.query.filter_by(center_id=id,appointment_date=appointment.appointment_date,start_time=appointment.start_time).first()
+            appointment.end_time = (datetime.datetime.combine(
+                datetime.date(1, 1, 1), start) + delta).time()
+            # Me trae el turno del centro recibido, con esa fecha y esa hora de inicio
+            turnos_del_dia = Appointment.query.filter_by(
+                center_id=id, appointment_date=appointment.appointment_date, start_time=appointment.start_time).first()
             if not turnos_del_dia:
                 centro.appointments.append(appointment)
                 db.session.commit()
                 # redirecciona a pagina turnos del dia del centro
                 # return redirect(url_for('admin.turnos_centro({})'.format(id)))
                 flash('Turno creado exitosamente', 'success')
-                return redirect(url_for('admin.turnos'))
+                return redirect(url_for('admin.turnos_centro', id=centro.id))
             else:
                 flash('Turno no disponible', 'danger')
                 return render_template('admin/turno_edit.html', form=form, center_name=centro_nombre, center_id=id, title='Centros de Ayuda GBA - Sacar turno')
@@ -710,14 +736,16 @@ def actualizar_turno(id):
             form.populate_obj(turno_edit)
             delta = datetime.timedelta(minutes=30)
             start = form.start_time.data
-            turno_edit.end_time = (datetime.datetime.combine(datetime.date(1,1,1),start) + delta).time()
-            # Me trae el turno del centro recibido, con esa fecha y esa hora de inicio 
-            turnos_del_dia = Appointment.query.filter_by(center_id=turno_edit.center_id,appointment_date=turno_edit.appointment_date,start_time=turno_edit.start_time)
+            turno_edit.end_time = (datetime.datetime.combine(
+                datetime.date(1, 1, 1), start) + delta).time()
+            # Me trae el turno del centro recibido, con esa fecha y esa hora de inicio
+            turnos_del_dia = Appointment.query.filter_by(
+                center_id=turno_edit.center_id, appointment_date=turno_edit.appointment_date, start_time=turno_edit.start_time)
             if turnos_del_dia.count() == 1:
                 db.session.commit()
                 # redirecciona al listado de usuarios
                 flash('Los cambios se guardaron correctamente.', 'success')
-                return redirect(url_for('admin.turnos'))
+                return redirect(url_for('admin.turnos_centro', id=centro.id))
             else:
                 flash('Turno no disponible', 'danger')
                 return render_template('admin/turno_edit.html', form=form, center_name=centro_nombre, title='Centros de Ayuda GBA - Actualizar turno')
@@ -727,11 +755,9 @@ def actualizar_turno(id):
         return redirect(url_for('admin.index'))
 
 
-
 @ admin_bp.route('turnos/eliminar/<id>', methods=['GET', 'POST'])
 @ login_required
 def eliminar_turno(id):
-
     """
         DELETE
         Eliminar un turno
@@ -742,9 +768,9 @@ def eliminar_turno(id):
 
         turno = Appointment.query.get(id)
         if not turno:
-            flash('El turno no existe.','danger')
+            flash('El turno no existe.', 'danger')
             return redirect(url_for('admin_index'))
-        
+
         db.session.delete(turno)
         db.session.commit()
 
@@ -757,6 +783,7 @@ def eliminar_turno(id):
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #  API ROUTES #
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 @ admin_bp.route('/centros', methods=["GET", "POST"])
 def api_centros():
@@ -775,12 +802,12 @@ def api_centros():
         # Obtener todos los Centros de Ayuda #
 
         centers = HelpCenter.query.all()
-        
+
         # Serializar a JSON los Centros de Ayuda #
 
         help_center_schema = HelpCenterSchema(many=True)
         output = help_center_schema.dump(centers)
-        
+
         # Crear una respuesta HTTP 200 OK con el JSON de Centros de Ayuda #
 
         res = make_response(jsonify(output), 200, {
@@ -797,19 +824,30 @@ def api_centros():
             data = request.get_json()
 
             # Instancia HelpCenter validando que esten todas las claves correspondientes en el JSON #
+            data["latitude"] = 0
+            data["longitude"] = 0
+
+            # validar Email
+            validate_email(data["email"])
+
+            # validar Horarios
+            if not bool(re.compile(r'^(([01]\d|2[0-3]):([0-5]\d)|24:00)$').match(data["opening_time"])):
+                raise Exception("Horario de apertura invalido")
+            if not bool(re.compile(r'^(([01]\d|2[0-3]):([0-5]\d)|24:00)$').match(data["close_time"])):
+                raise Exception("Horario de cierre invalido")
 
             help_center = HelpCenter(**{k: data[k] for k in ("name_center",
-                "address",
-                "phone",
-                "opening_time",
-                "close_time",
-                "town",
-                "web",
-                "email",
-                "visit_protocol",
-                "center_type_id",
-                "latitude",
-                "longitude") if k in data})
+                                                             "address",
+                                                             "phone",
+                                                             "opening_time",
+                                                             "close_time",
+                                                             "town",
+                                                             "web",
+                                                             "email",
+                                                             "visit_protocol",
+                                                             "center_type_id",
+                                                             "latitude",
+                                                             "longitude") if k in data})
 
             # Actualiza BD con el nuevo Centro de Ayuda #
 
@@ -820,7 +858,10 @@ def api_centros():
 
             res = make_response(jsonify(data), 201, {
                                 'Content-Type': 'application/json; charset=utf-8'})
-        except:
+        except EmailNotValidError:
+            res = make_response(
+                jsonify({"mensaje": "E-mail inválido."}), 400)
+        except Exception:
 
             # Crea una respuesta HTTP 400 Bad Request si falla la creacion  #
 
@@ -844,10 +885,10 @@ def api_centro(centro_id):
     """
 
     center = HelpCenter.query.filter_by(id=centro_id).first()
-    
-    if not center: 
-        abort(404) 
-        
+
+    if not center:
+        abort(404)
+
     # Serializar a JSON los Centros de Ayuda #
 
     help_center_schema = HelpCenterSchema()
@@ -857,12 +898,9 @@ def api_centro(centro_id):
 
     return make_response(jsonify(output), 200, {'Content-Type': 'application/json; charset=utf-8'})
 
-     
-
 
 @ admin_bp.route('/centros/<centro_id>/turnos_disponibles', methods=["GET"])
 def api_centro_turnos(centro_id):
-
     """
          API endpoint: /centros/<centro_id>/turnos_disponibles/?fecha=<fecha>
 
@@ -875,8 +913,9 @@ def api_centro_turnos(centro_id):
             fecha: YY-MM-DD (ej:2020-12-01)
 
     """
-    if not HelpCenter.query.filter_by(id=centro_id).first(): abort(404)
-        
+    if not HelpCenter.query.filter_by(id=centro_id).first():
+        abort(404)
+
     data = {}
     data['turnos'] = []
     delta = datetime.timedelta(minutes=30)
@@ -886,19 +925,21 @@ def api_centro_turnos(centro_id):
         date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
     else:
         date = datetime.date.today()
-    todos_los_turnos=[datetime.time(9),datetime.time(9,30),
-                    datetime.time(10),datetime.time(10,30),
-                    datetime.time(11),datetime.time(11,30),
-                    datetime.time(12),datetime.time(12,30),
-                    datetime.time(13),datetime.time(13,30),
-                    datetime.time(14),datetime.time(14,30),
-                    datetime.time(15),datetime.time(15,30)]
+    todos_los_turnos = [datetime.time(9), datetime.time(9, 30),
+                        datetime.time(10), datetime.time(10, 30),
+                        datetime.time(11), datetime.time(11, 30),
+                        datetime.time(12), datetime.time(12, 30),
+                        datetime.time(13), datetime.time(13, 30),
+                        datetime.time(14), datetime.time(14, 30),
+                        datetime.time(15), datetime.time(15, 30)]
     # Filtro los turnos del dia del centro recibido
-    turnos_del_dia = Appointment.query.filter_by(center_id=centro_id,appointment_date=date).all()
+    turnos_del_dia = Appointment.query.filter_by(
+        center_id=centro_id, appointment_date=date).all()
     for turno in turnos_del_dia:
         todos_los_turnos.remove(turno.start_time)
     for turno in todos_los_turnos:
-        fin = (datetime.datetime.combine(datetime.date(1,1,1),turno) + delta).time()
+        fin = (datetime.datetime.combine(
+            datetime.date(1, 1, 1), turno) + delta).time()
         data['turnos'].append({
             'centro_id': int(centro_id),
             'hora_inicio': turno.strftime("%H:%M"),
@@ -907,7 +948,7 @@ def api_centro_turnos(centro_id):
         })
     a = json.dumps(data, sort_keys=False)
     # Crear una respuesta HTTP 200 OK con el JSON de Turnos del dia #
-    
+
     res = make_response(a, 200, {
         'Content-Type': 'application/json; charset=utf-8'})
 
@@ -927,42 +968,75 @@ def api_centro_reserva(centro_id):
 
     """
     try:
+        if not HelpCenter.query.filter_by(id=centro_id).first():
+            raise Exception("El centro de ayuda no existe.")
         data = request.get_json()
-        center_accepted = HelpCenter.query.filter_by(id=centro_id).filter_by(status_id=1).first()
-        
-        opening_center = HelpCenter.query.filter_by(id=centro_id).first().opening_time
-        close_center = HelpCenter.query.filter_by(id=centro_id).first().close_time
 
-        request_start = datetime.datetime.strptime(data["start_time"], '%H:%M').time()
-        request_end = datetime.datetime.strptime(data["end_time"], '%H:%M').time()
+        # validar formato Horarios
+        
+        if type(data["start_time"]) != str or not bool(re.compile(r'^(([01]\d|2[0-3]):([0-5]\d)|24:00)$').match(data["start_time"])):
+            raise Exception("Horario de apertura invalido")
+        if type(data["end_time"]) != str or not bool(re.compile(r'^(([01]\d|2[0-3]):([0-5]\d)|24:00)$').match(data["end_time"])):
+            raise Exception("Horario de cierre invalido")
+
+        center_accepted = HelpCenter.query.filter_by(
+            id=centro_id).filter_by(status_id=1).first()
+
+        opening_center = HelpCenter.query.filter_by(
+            id=centro_id).first().opening_time
+        close_center = HelpCenter.query.filter_by(
+            id=centro_id).first().close_time
+
+        request_start = datetime.datetime.strptime(
+            data["start_time"], '%H:%M').time()
+        request_end = datetime.datetime.strptime(
+            data["end_time"], '%H:%M').time()
 
         appointment_start = request_start
         appointment_end = request_end
 
-        exists = Appointment.query.filter_by(center_id=centro_id).filter_by(appointment_date=data["appointment_date"]).filter_by(start_time=data["start_time"]).first()
+        exists = Appointment.query.filter_by(center_id=centro_id).filter_by(
+            appointment_date=data["appointment_date"]).filter_by(start_time=data["start_time"]).first()
+
+        # validar formato Email
         
+        validate_email(data["email"])
+
+
+        # validar estado del centro
 
         if not center_accepted:
             raise Exception("El centro de ayuda no está disponible.")
+        
+        # validar franjas horarias
+
         if not (appointment_start >= opening_center and appointment_end <= close_center):
-            raise Exception("El horario solicitado está fuera del rango del horario de atención.")
-        correct_end=(datetime.datetime.combine(datetime.date(1,1,1),request_start)+datetime.timedelta(minutes=30)).time()
+            raise Exception(
+                "El horario solicitado está fuera del rango del horario de atención.")
+        correct_end = (datetime.datetime.combine(datetime.date(
+            1, 1, 1), request_start)+datetime.timedelta(minutes=30)).time()
         if not (correct_end == request_end):
             raise Exception("Los bloques deben ser de 30 minutos.")
         if exists:
             raise Exception("El turno solicitado ya está reservado.")
-        appointment = Appointment(**{k: data[k] for k in("email",
-            "start_time",
-            "end_time",
-            "appointment_date",
-            "center_id"
-        ) if k in data})
+        appointment = Appointment(**{k: data[k] for k in ("email",
+                                                          "first_name",
+                                                          "last_name",
+                                                          "phone",
+                                                          "start_time",
+                                                          "end_time",
+                                                          "appointment_date",
+                                                          "center_id"
+                                                          ) if k in data})
 
         db.session.add(appointment)
         db.session.commit()
         res = make_response(jsonify(data), 201, {
-                        'Content-Type': 'application/json; charset=utf-8'})
+            'Content-Type': 'application/json; charset=utf-8'})
 
+    except EmailNotValidError:
+        res = make_response(
+            jsonify({"mensaje": "E-mail inválido."}), 400)
     except Exception as err:
         res = make_response(
             jsonify({"mensaje": str(err)}), 400)

@@ -11,9 +11,7 @@
             />
           </b-navbar-brand>
         </b-link>
-
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
-
         <b-collapse id="nav-collapse" is-nav>
           <!-- Right aligned nav items -->
           <b-navbar-nav class="ml-auto">
@@ -31,7 +29,7 @@
       </b-navbar>
     </header>
     <section class="main-route-content">
-      <router-view />
+        <router-view />
     </section>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#2f9bae" fill-opacity="1" d="M0,160L120,154.7C240,149,480,139,720,149.3C960,160,1200,192,1320,208L1440,224L1440,320L1320,320C1200,320,960,320,720,320C480,320,240,320,120,320L0,320Z"></path></svg>
     <footer class="footer-content">
@@ -44,17 +42,21 @@
             />
             </b-col>
           <b-col class="align-items-end">
-            <b-link to="/" class="nav-route-link mt-4">
-              <b-icon-house></b-icon-house> Inicio
+            <h5 class="footer-info"> Enlaces</h5>
+            <b-link to="/" class="nav-route-link mt-1">
+              Inicio
             </b-link><br>
             <b-link to="/centros" class="nav-route-link mt-4">
-              <b-icon-map></b-icon-map> Ver Centros
+              Ver Centros
             </b-link><br>
             <b-link to="/solicitar_centro" class="nav-route-link mt-4">
-              <b-icon-plus></b-icon-plus> Añadir centro
+              Añadir centro
             </b-link><br>
-            <b-link to="/estadisticas" class="nav-route-link mt-4">
-              <b-icon-graph-up></b-icon-graph-up> Estadisticas
+            <b-link to="/estadisticas" class="nav-route-link mt-4 mb-4">
+            Estadisticas
+            </b-link><br><h5 class="footer-info"> Uso Interno </h5>
+            <b-link href="https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/" class="nav-route-link mt-1">
+            Administracion
             </b-link><br>
             </b-col>
         </b-row>
@@ -135,9 +137,9 @@ export default {
 }
 .footer-info-container1 .col{
   display: flex;
-  justify-content: start;
+  justify-content: flex-start;
   flex-direction: column;
-  align-items: start;
+  align-items: flex-start;
 }
 .footer-info-container2{
   flex-direction: column;

@@ -24,38 +24,47 @@
           </l-map>
         </div>
       </b-col>
-      <b-col v-if="showOn" b-col cols="4">
-        <b-container class="pl-0" fluid style="height: 500px">
-          <b-row>
-            <h2>{{ centerData.name_center }} </h2>
-          </b-row>
-          <br>
-          <b-row>
-            <h5>Dirección: {{ centerData.address }}</h5>
-          </b-row>
-          <b-row>
-            <h5>Municipio: {{ centerData.town }}</h5>
-          </b-row>
-          <b-row v-if="centerData.email" >
-            <h5>
-              Email: {{ centerData.email }}
-            </h5>
-          </b-row>
-          <b-row v-else>
-            <h5>
-              Email: No disponible
-            </h5>
-          </b-row>
-          <b-row>
-            <h5> Teléfono: {{ centerData.phone }}</h5>
-          </b-row>
-          <b-row>
-          <h5>Abierto: {{ centerData.opening_time }} - {{ centerData.close_time }} </h5>
-          </b-row>
-          <br>
-          <b-button :id="centerData.id" block pill variant="info" size="lg" class="w-50" :to="this.$route.path + '/' + centerData.id + '/solicitar_turno'"><b-icon-calendar-date></b-icon-calendar-date> Solicitar turno </b-button>
-        </b-container>
-      </b-col>
+      <transition name="fade">
+        <b-col v-if="showOn" b-col cols="4">
+          <b-container class="pl-0" fluid style="height: 500px">
+            <b-row class="justify-content-end mr-4">
+              <h1>
+                <b-link>
+                  <b-icon-x-circle v-on:click="close_info()"></b-icon-x-circle>
+                </b-link>
+              </h1>
+            </b-row>
+            <b-row>
+              <h2>{{ centerData.name_center }} </h2>
+            </b-row>
+            <br>
+            <b-row>
+              <h5>Dirección: {{ centerData.address }}</h5>
+            </b-row>
+            <b-row>
+              <h5>Municipio: {{ centerData.town }}</h5>
+            </b-row>
+            <b-row v-if="centerData.email" >
+              <h5>
+                Email: {{ centerData.email }}
+              </h5>
+            </b-row>
+            <b-row v-else>
+              <h5>
+                Email: No disponible
+              </h5>
+            </b-row>
+            <b-row>
+              <h5> Teléfono: {{ centerData.phone }}</h5>
+            </b-row>
+            <b-row>
+            <h5>Abierto: {{ centerData.opening_time }} - {{ centerData.close_time }} </h5>
+            </b-row>
+            <br>
+            <b-button :id="centerData.id" block pill variant="info" size="lg" class="w-50" :to="this.$route.path + '/' + centerData.id + '/solicitar_turno'"><b-icon-calendar-date></b-icon-calendar-date> Solicitar turno </b-button>
+          </b-container>
+        </b-col>
+      </transition>
     </b-row>
   </div>
 </template>
@@ -67,10 +76,6 @@ import { LMap, LTileLayer, LMarker, LPopup } from 'vue2-leaflet'
 const axios = require('axios').default
 
 export default {
-  // name: 'Centros',
-  // components: {
-  //  CentroInfo
-  // },
   name: 'MyAwesomeMap',
   components: {
     LMap,
@@ -107,8 +112,20 @@ export default {
       this.showOn = true
       this.centerData = dataCenter
       console.log(this.centerData)
+    },
+    close_info: function () {
+      this.showOn = false
     }
   }
 }
 
 </script>
+
+<style scoped>
+  .fade-enter-active, .fade-leave-active {
+  transition: opacity .5s
+  }
+  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0
+  }
+</style>

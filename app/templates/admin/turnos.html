@@ -70,8 +70,13 @@
         </div>
         <div class="col d-flex justify-content-end p-2">
             <div>
+                {% if not centro %}
                 <a class="btn-success btn" href="{{ url_for('admin.crear_turno') }}">Nuevo turno <i
-                        class="fas fa-plus"></i> </a>
+                    class="fas fa-plus"></i> </a>
+                {% else %}
+                <a class="btn-success btn" href="{{ url_for('admin.crear_turno', id=centro.id) }}">Nuevo turno <i
+                    class="fas fa-plus"></i> </a>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -5,7 +5,6 @@ import Centros from '../views/Centros.vue'
 import Estadisticas from '../views/Estadisticas.vue'
 import SolicitarCentro from '../views/SolicitarCentro.vue'
 import SolicitarTurno from '../views/SolicitarTurno.vue'
-import CentroInfo from '../components/CentroInfo.vue'
 
 Vue.use(VueRouter)
 
@@ -20,16 +19,10 @@ const routes = [
     name: 'Centros',
     component: Centros,
     children: [{
-      path: 'informacion/:id',
-      name: 'Info de un centro elegido',
-      component: CentroInfo,
-      children: [{
-        path: '/solicitar_turno',
-        name: 'Solicitar Turno',
-        component: SolicitarTurno
-      }]
-    }
-    ]
+      path: '/:id/solicitar_turno',
+      name: 'Solicitar Turno',
+      component: SolicitarTurno
+    }]
   },
   {
     path: '/solicitar_centro',

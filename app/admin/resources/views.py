@@ -917,7 +917,7 @@ def api_centro_turnos(centro_id):
         abort(404)
 
     data = {}
-    data['turnos'] = []
+    data['appointments'] = []
     delta = datetime.timedelta(minutes=30)
     # date toma el dia pasado, si no se pasa el argumento toma el dia de hoy
     fecha = request.args.get('fecha')
@@ -940,11 +940,11 @@ def api_centro_turnos(centro_id):
     for turno in todos_los_turnos:
         fin = (datetime.datetime.combine(
             datetime.date(1, 1, 1), turno) + delta).time()
-        data['turnos'].append({
-            'centro_id': int(centro_id),
-            'hora_inicio': turno.strftime("%H:%M"),
-            'hora_fin': fin.strftime("%H:%M"),
-            'fecha': date.strftime('%Y-%m-%d')
+        data['appointments'].append({
+            'center_id': int(centro_id),
+            'start_time': turno.strftime("%H:%M"),
+            'end_time': fin.strftime("%H:%M"),
+            'appointment_date': date.strftime('%Y-%m-%d')
         })
     a = json.dumps(data, sort_keys=False)
     # Crear una respuesta HTTP 200 OK con el JSON de Turnos del dia #

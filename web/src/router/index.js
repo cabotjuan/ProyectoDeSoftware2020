@@ -17,12 +17,12 @@ const routes = [
   {
     path: '/centros',
     name: 'Centros',
-    component: Centros,
-    children: [{
-      path: '/:id/solicitar_turno',
-      name: 'Solicitar Turno',
-      component: SolicitarTurno
-    }]
+    component: Centros
+  },
+  {
+    path: '/centros/:id/solicitar_turno',
+    name: 'Solicitar Turno',
+    component: SolicitarTurno
   },
   {
     path: '/solicitar_centro',

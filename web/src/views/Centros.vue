@@ -66,6 +66,7 @@
         </b-col>
       </transition>
     </b-row>
+    <router-view />
   </div>
 </template>
 <script>

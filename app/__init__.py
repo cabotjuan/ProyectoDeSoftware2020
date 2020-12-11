@@ -8,6 +8,7 @@ from .extensions import db
 from .extensions import login_manager
 from app.admin.resources.views import admin_bp as admin_blueprint
 from app.admin.helpers import handler
+from flask_cors import CORS
 
 def create_app(environment="development"):
     # Configuración inicial de la app
@@ -18,6 +19,8 @@ def create_app(environment="development"):
     login_manager.login_message = "Debes estar autenticado para ver esta pagina."
     login_manager.login_message_category = "danger"
     login_manager.login_view = "admin.login"
+
+    CORS(app)
 
     # Configuracion file_upload
     app.config["UPLOAD_FOLDER"] = 'static/uploads'

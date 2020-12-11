@@ -7,6 +7,7 @@ from sqlalchemy import or_
 from os import path
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import CombinedMultiDict
+from flask_cors import cross_origin
 import requests
 import math
 import decimal
@@ -900,6 +901,7 @@ def api_centro(centro_id):
 
 
 @ admin_bp.route('/centros/<centro_id>/turnos_disponibles', methods=["GET"])
+@ cross_origin()
 def api_centro_turnos(centro_id):
     """
          API endpoint: /centros/<centro_id>/turnos_disponibles/?fecha=<fecha>
@@ -956,6 +958,7 @@ def api_centro_turnos(centro_id):
 
 
 @ admin_bp.route('/centros/<centro_id>/reserva', methods=["POST"])
+@ cross_origin()
 def api_centro_reserva(centro_id):
     """
          API endpoint: /centros/<centro_id>/reserva

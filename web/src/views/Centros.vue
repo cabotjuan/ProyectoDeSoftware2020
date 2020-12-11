@@ -1,16 +1,15 @@
 <template>
   <div>
-    <b-row class="p-4">
-      <h1>Mapa de Centros de Ayuda</h1>
-    </b-row>
+    <h1 class="p-3 mb-4 bg-info text-white text-center"><b-icon-map></b-icon-map> Centros de Ayuda</h1>
     <b-row>
       <b-col b-col>
         <div class="px-3" style="height: 500px">
 
           <l-map
-            style="height: 90%; width: 100%"
+            style="height: 90%; width: 100%; display: flex;"
             :zoom="zoom"
             :center="center"
+            id='map'
           >
             <div v-if="centers && centers.length">
               <l-marker v-on:click="show_center(c)" v-for="c in centers" :key="c.id" :lat-lng="[c.latitude, c.longitude]">
@@ -61,7 +60,7 @@
             <h5>Abierto: {{ centerData.opening_time }} - {{ centerData.close_time }} </h5>
             </b-row>
             <br>
-            <b-button :id="centerData.id" block pill variant="info" size="lg" class="w-50" :to="this.$route.path + '/' + centerData.id + '/solicitar_turno'"><b-icon-calendar-date></b-icon-calendar-date> Solicitar turno </b-button>
+            <b-button :id="centerData.id" block pill variant="info" size="lg" :to="this.$route.path + '/' + centerData.id + '/solicitar_turno'"><b-icon-calendar-date></b-icon-calendar-date> Solicitar turno </b-button>
           </b-container>
         </b-col>
       </transition>
@@ -112,7 +111,7 @@ export default {
     show_center: function (dataCenter) {
       this.showOn = true
       this.centerData = dataCenter
-      console.log(this.centerData)
+      this.center = [this.centerData.latitude, this.centerData.longitude]
     },
     close_info: function () {
       this.showOn = false

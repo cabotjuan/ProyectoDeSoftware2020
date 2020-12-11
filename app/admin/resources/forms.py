@@ -139,6 +139,12 @@ class AppointmentForm(FlaskForm):
     submit = SubmitField('Guardar')
     email = StringField('Email', validators=[
                         DataRequired('Este campo es requerido'), Email()])
+    first_name = StringField('Nombre', validators=[
+        DataRequired('Este campo es requerido')])
+    last_name = StringField('Apellido', validators=[
+        DataRequired('Este campo es requerido')])
+    phone = IntegerField('Telefono', validators=[
+        DataRequired('Este campo es requerido')])
     start_time = TimeField('Hora de inicio:', validators=[DataRequired(
         'Este campo es requerido')], format='%H:%M')
     appointment_date = DateField('Fecha:', validators=[DataRequired(

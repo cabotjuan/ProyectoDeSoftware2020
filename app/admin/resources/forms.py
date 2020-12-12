@@ -150,15 +150,6 @@ class AppointmentForm(FlaskForm):
     appointment_date = DateField('Fecha:', validators=[DataRequired(
         'Este campo es requerido')], format='%Y-%m-%d')
 
-    def validate_start_time(self, field):
-        if field.data < datetime.time(9):
-            raise ValidationError('Los turnos se dan desde las 9:00.')
-        if field.data > datetime.time(15, 30):
-            raise ValidationError('Los turnos se dan hasta las 15:30.')
-
-    def validate_appointment_date(self, field):
-        if field.data < datetime.date.today():
-            raise ValidationError('La fecha debe ser desde el dia de hoy.')
 
 
 class AppointmentWithCenterForm(AppointmentForm):

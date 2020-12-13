@@ -15,7 +15,7 @@ import datetime
 import json
 import re
 from email_validator import validate_email, EmailNotValidError
-
+from app.admin.helpers.turnos import generar_turnos
 
 # Blueprint Administracion
 admin_bp = Blueprint('admin', __name__)
@@ -607,7 +607,7 @@ def turnos_buscar(page=1):
 @ admin_bp.route('turnos/buscar/centro/<id>', methods=['GET', 'POST'])
 @ admin_bp.route('turnos/buscar/centro/<id>/<int:page>', methods=['GET', 'POST'])
 @ login_required
-def turnos_centro_buscar(id, page=1):
+def turnos_centro_buscar(id=0, page=1):
     search_date = request.form.get('buscar-fecha')
     search_name = request.form.get('buscar-nombre')
     id_usuario = current_user.get_id()
@@ -628,8 +628,9 @@ def turnos_centro_buscar(id, page=1):
 
 
 @ admin_bp.route('centro/<id>/turnos', methods=['GET', 'POST'])
+@ admin_bp.route('centro/<id>/turnos/<int:page>', methods=['GET', 'POST'])
 @ login_required
-def turnos_centro(id, page=1):
+def turnos_centro(id=0, page=1):
     id_usuario = current_user.get_id()
     usuarios_por_pag = Config.query.first().n_elements
     centro = HelpCenter.query.filter_by(id=id).first()
@@ -917,7 +918,9 @@ def api_centro_turnos(centro_id):
             fecha: YY-MM-DD (ej:2020-12-01)
 
     """
-    if not HelpCenter.query.filter_by(id=centro_id).first():
+    center = HelpCenter.query.filter_by(id=centro_id).first()
+
+    if not center:
         abort(404)
 
     data = {}
@@ -925,17 +928,14 @@ def api_centro_turnos(centro_id):
     delta = datetime.timedelta(minutes=30)
     # date toma el dia pasado, si no se pasa el argumento toma el dia de hoy
     fecha = request.args.get('fecha')
+    
     if fecha:
         date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
     else:
         date = datetime.date.today()
-    todos_los_turnos = [datetime.time(9), datetime.time(9, 30),
-                        datetime.time(10), datetime.time(10, 30),
-                        datetime.time(11), datetime.time(11, 30),
-                        datetime.time(12), datetime.time(12, 30),
-                        datetime.time(13), datetime.time(13, 30),
-                        datetime.time(14), datetime.time(14, 30),
-                        datetime.time(15), datetime.time(15, 30)]
+
+    todos_los_turnos = generar_turnos(center.opening_time, center.close_time)
+
     # Filtro los turnos del dia del centro recibido
     turnos_del_dia = Appointment.query.filter_by(
         center_id=centro_id, appointment_date=date).all()

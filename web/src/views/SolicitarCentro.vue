@@ -256,7 +256,6 @@ export default {
       this.marker = event.latlng
       this.form.latitude = this.marker.lat
       this.form.longitude = this.marker.lng
-      console.log(this.form)
     },
     set_opening_time () {
       this.form.opening_time = this.opening_time_sec.substring(0, 5)

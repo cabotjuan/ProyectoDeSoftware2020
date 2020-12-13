@@ -139,22 +139,6 @@
             </b-form-input>
             </b-form-group>
             <b-form-group
-              id="input-group-9"
-              label="Protocolo de visita:"
-              label-for="input-9"
-            >
-            <b-form-file
-              id="input-9"
-              v-model="visit_protocol_object"
-              class="mt-3"
-              plain
-            >
-            </b-form-file>
-            <div v-if="visit_protocol_object">
-              {{ set_visit_protocol() }}
-            </div>
-            </b-form-group>
-            <b-form-group
               id="input-group-10"
               label="Ubicación:"
               label-for="input-10"
@@ -167,7 +151,9 @@
               @click="add_marker"
               id='map'
             >
-              <l-marker v-if="marker" :lat-lng="marker"></l-marker>
+              <l-marker v-if="marker" :lat-lng="marker">
+                <l-tooltip>{{ form.latitude }} - {{ form.longitude }}</l-tooltip>
+              </l-marker>
               <l-tile-layer :url="url"></l-tile-layer>
             </l-map>
             </div>
@@ -187,7 +173,7 @@
   </div>
 </template>
 <script>
-import { LMap, LTileLayer, LMarker } from 'vue2-leaflet'
+import { LMap, LTileLayer, LMarker, LTooltip } from 'vue2-leaflet'
 import swal from 'sweetalert'
 import VueRecaptcha from 'vue-recaptcha'
 const axios = require('axios').default
@@ -197,7 +183,8 @@ export default {
     LMap,
     LTileLayer,
     LMarker,
-    VueRecaptcha
+    VueRecaptcha,
+    LTooltip
   },
   data () {
     return {
@@ -223,7 +210,6 @@ export default {
       errors: [],
       rango: [],
       ok: true,
-      visit_protocol_object: null,
       opening_time_sec: '',
       close_time_sec: '',
       center_types: [
@@ -279,10 +265,6 @@ export default {
       this.marker = event.latlng
       this.form.latitude = this.marker.lat
       this.form.longitude = this.marker.lng
-      console.log(this.form)
-    },
-    set_visit_protocol () {
-      this.form.visit_protocol = this.visit_protocol_object.name
     },
     set_opening_time () {
       this.form.opening_time = this.opening_time_sec.substring(0, 5)

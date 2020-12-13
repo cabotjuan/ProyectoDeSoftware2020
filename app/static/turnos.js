@@ -9,7 +9,7 @@ $(document).ready(function () {
                 Object.entries(data).forEach(
                     ([key, turnos]) => turnos.forEach(
                         (turno) => {
-                            $('#TurnosDisponibles').append('<option value="' + turno.hora_inicio + '">' + turno.hora_inicio + '</option>')
+                            $('#TurnosDisponibles').append('<option value="' + turno.start_time + '">' + turno.start_time + '</option>')
                         }
                     )
                 );

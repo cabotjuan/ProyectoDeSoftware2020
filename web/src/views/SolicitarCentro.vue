@@ -172,6 +172,13 @@
             </l-map>
             </div>
             </b-form-group>
+            <b-form-group
+              id="input-group-verificar"
+              label="Verificacion:"
+              label-for="input-verificar"
+            >
+            <vue-recaptcha ref="recaptcha" @verify="onVerify" sitekey="6LezGQUaAAAAABBRwpY3FGileNcOiKk5RyM5-h4g"></vue-recaptcha>
+            </b-form-group>
             <b-button class= "mt-4" type="submit" variant="primary">Enviar datos</b-button>
           </b-form>
         </b-col>
@@ -179,17 +186,18 @@
     </b-container>
   </div>
 </template>
-
 <script>
 import { LMap, LTileLayer, LMarker } from 'vue2-leaflet'
 import swal from 'sweetalert'
+import VueRecaptcha from 'vue-recaptcha'
 const axios = require('axios').default
 export default {
   name: 'MyAwesomeMap',
   components: {
     LMap,
     LTileLayer,
-    LMarker
+    LMarker,
+    VueRecaptcha
   },
   data () {
     return {
@@ -202,10 +210,10 @@ export default {
         town: null,
         web: '',
         email: '',
-        visit_protocol: '',
         center_type_id: null,
         latitude: 0,
-        longitude: 0
+        longitude: 0,
+        robot: false
       },
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       zoom: 14,
@@ -230,6 +238,7 @@ export default {
   },
   methods: {
     get_towns () {
+      swal('Error', 'Debes indicar que no eres un robot.', 'warning')
       axios.get('https://api-referencias.proyecto2020.linti.unlp.edu.ar/municipios')
         .then(response => {
           this.ok = false
@@ -251,16 +260,20 @@ export default {
         })
     },
     post_center () {
-      axios.post('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros', this.form)
-        .then(response => {
-          swal('¡Listo!', 'El centro se cargó correctamente', 'success')
-            .then(() => {
-              this.$router.push({ name: 'Home' })
-            })
-        })
-        .catch(e => {
-          console.log(e)
-        })
+      if (this.form.robot) {
+        axios.post('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros', this.form)
+          .then(response => {
+            swal('¡Listo!', 'El centro se cargó correctamente', 'success')
+              .then(() => {
+                this.$router.push({ name: 'Home' })
+              })
+          })
+          .catch(e => {
+            console.log(e)
+          })
+      } else {
+        swal('Debes indicar que no eres un robot.', 'error')
+      }
     },
     add_marker (event) {
       this.marker = event.latlng
@@ -276,6 +289,9 @@ export default {
     },
     set_close_time () {
       this.form.close_time = this.close_time_sec.substring(0, 5)
+    },
+    onVerify: function (response) {
+      if (response) this.form.robot = true
     }
   },
   computed: {

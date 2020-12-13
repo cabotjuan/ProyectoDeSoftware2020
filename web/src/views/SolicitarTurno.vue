@@ -115,12 +115,7 @@ export default {
   methods: {
     get_appointments () {
       this.showOn = true
-      const config = {
-        headers: {
-          'Acces-Control-Allow-Origin': '*'
-        }
-      }
-      axios.get('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros/' + this.$route.params.id + '/turnos_disponibles?fecha=' + this.form.appointment_date, config)
+      axios.get('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros/' + this.$route.params.id + '/turnos_disponibles?fecha=' + this.form.appointment_date)
         .then(response => {
           this.appointments = response.data.appointments
           this.loading = false

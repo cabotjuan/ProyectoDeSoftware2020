@@ -825,8 +825,10 @@ def api_centros():
             data = request.get_json()
 
             # Instancia HelpCenter validando que esten todas las claves correspondientes en el JSON #
-            data["latitude"] = 0
-            data["longitude"] = 0
+            if not data["latitude"]:
+                data["latitude"] = 0
+            if not data["longitude"]:
+                data["longitude"] = 0
 
             # validar Email
             validate_email(data["email"])

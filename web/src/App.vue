@@ -116,7 +116,7 @@ export default {
 
 .footer-content {
   height: 75vh;
-  max-height: 350px;
+  max-height: 450px;
   margin-top: -5px;
   background-color: #2f9bae;
 }

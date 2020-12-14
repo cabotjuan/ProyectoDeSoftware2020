@@ -19,7 +19,7 @@
               <b-icon-map></b-icon-map> Ver Centros
             </b-link>
             <b-link to="/solicitar_centro" class="nav-route-link">
-              <b-icon-plus></b-icon-plus> Añadir centro
+              <b-icon-plus></b-icon-plus> Solicitar Centro de Ayuda
             </b-link>
             <b-link to="/estadisticas" class="nav-route-link">
               <b-icon-graph-up></b-icon-graph-up> Estadisticas
@@ -50,7 +50,7 @@
               Ver Centros
             </b-link><br>
             <b-link to="/solicitar_centro" class="nav-route-link mt-4">
-              Añadir centro
+              Solicitar Centro
             </b-link><br>
             <b-link to="/estadisticas" class="nav-route-link mt-4 mb-4">
             Estadisticas

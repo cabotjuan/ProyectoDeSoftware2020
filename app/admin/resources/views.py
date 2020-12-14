@@ -830,6 +830,10 @@ def api_centros():
                 data["latitude"] = 0
             if not data["longitude"]:
                 data["longitude"] = 0
+            if not data["web"]:
+                data["web"] = '-'
+            if not data["email"]:
+                data["email"] = '-'
 
             # validar Email
             validate_email(data["email"])

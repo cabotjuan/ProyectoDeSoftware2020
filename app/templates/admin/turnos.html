@@ -61,8 +61,9 @@
                         </div>
 
                         <div class="input-group-append">
-                            <button class="btn btn-secondary" type="submit" id="buscar-boton"><i
+                            <button class="btn btn-secondary" type="submit" id="buscar-boton">Buscar <i
                                     class="fas fa-search"></i></button>
+                            
                         </div>
                     </div>
 
@@ -70,8 +71,12 @@
         </div>
         <div class="col d-flex justify-content-end p-2">
             <div>
+                <a class="btn btn-outline-light ml-1 mt-1" href="{{url_for('admin.turnos_buscar', page=1)}}">Historial <i
+                        class="fas fa-eye"></i></a>
+                <a class="btn btn-outline-light ml-1 mt-1" href="{{url_for('admin.turnos')}}">Ver Próximos <i
+                        class="fas fa-eye"></i></a>
                 {% if not centro %}
-                <a class="btn-success btn" href="{{ url_for('admin.crear_turno') }}">Nuevo turno <i
+                <a class="btn-success btn mt-1" href="{{ url_for('admin.crear_turno') }}">Nuevo turno <i
                     class="fas fa-plus"></i> </a>
                 {% else %}
                 <a class="btn-success btn" href="{{ url_for('admin.crear_turno', id=centro.id) }}">Nuevo turno <i
@@ -81,10 +86,20 @@
         </div>
     </div>
     <div class="row">
-        <div class="table-responsive">
-            <table class="table table-sm table-hover table-light table-striped">
-                <thead>
-                    <tr>
+        {% if not 'buscar' in request.path%}
+        <div class="alert alert-success w-100 m-0"><i class="fas fa-eye"></i> Proximos 3 dias</div>
+        {% else %}
+        {%  if request.args.get('buscar') or request.args.get('fecha') %}
+        <div class="alert alert-info w-100"><i class="fas fa-eye"></i> <b>{{request.args.get('buscar')}}
+            {{request.args.get('fecha')}}</b> </div>
+            {% else %}
+            <div class="alert alert-info w-100"><i class="fas fa-eye"></i> Historial </div>
+            {% endif %}
+            {% endif %}
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-hover table-light table-striped">
+                                                        <thead>
+                                                            <tr>
                         {% if not centro %}
                         <th scope="col">Centro de Ayuda</th>
                         {% endif %}
@@ -155,7 +170,7 @@
                     <li class="page-item">
                         {% if 'centro' in request.path  %}
                             {% if 'buscar' in request.path  %}
-                                <a class="page-link" href="{{ url_for('admin.turnos_centro_buscar', id=centro.id, page=turnos.prev_num) }}"
+                                <a class="page-link" href="{{ url_for('admin.turnos_centro_buscar', id=centro.id, page=turnos.prev_num, buscar=request.args.get('buscar'), fecha=request.args.get('fecha')) }}"
                                 tabindex="-1" aria-disabled="true">Anterior</a>
                             {% else %}
                                 <a class="page-link" href="{{ url_for('admin.turnos_centro', id=centro.id, page=turnos.prev_num) }}" tabindex="-1"
@@ -163,7 +178,7 @@
                             {% endif %}
                         {% else %}
                             {% if 'buscar' in request.path  %}
-                            <a class="page-link" href="{{ url_for('admin.turnos_buscar', page=turnos.prev_num) }}" tabindex="-1"
+                            <a class="page-link" href="{{ url_for('admin.turnos_buscar', page=turnos.prev_num, buscar=request.args.get('buscar'), fecha=request.args.get('fecha')) }}" tabindex="-1"
                                 aria-disabled="true">Anterior</a>
                             {% else %}
                             <a class="page-link" href="{{ url_for('admin.turnos', page=turnos.prev_num) }}" tabindex="-1"
@@ -185,15 +200,14 @@
                     {% if page_num != turnos.page %}
                     <li class="page-item">
                         {% if 'centro' in request.path %}
-                            {{ request.params }}
                             {% if 'buscar' in request.path %}
-                            <a class="page-link" href="{{ url_for('admin.turnos_centro_buscar', id=centro.id, page=page_num) }}">{{ page_num }}</a>
+                            <a class="page-link" href="{{ url_for('admin.turnos_centro_buscar', id=centro.id, page=page_num, buscar=request.args.get('buscar'), fecha=request.args.get('fecha')) }}">{{ page_num }}</a>
                             {% else %}
                             <a class="page-link" href="{{ url_for('admin.turnos_centro', id=centro.id, page=page_num) }}">{{ page_num }}</a>
                             {% endif %}
                         {% else %}
                             {% if 'buscar' in request.path %}
-                            <a class="page-link" href="{{ url_for('admin.turnos_buscar', page=page_num) }}">{{ page_num }}</a>
+                            <a class="page-link" href="{{ url_for('admin.turnos_buscar', page=page_num, buscar=request.args.get('buscar'), fecha=request.args.get('fecha')) }}">{{ page_num }}</a>
                             {% else %}
                             <a class="page-link" href="{{ url_for('admin.turnos', page=page_num) }}">{{ page_num }}</a>
                             {% endif %}
@@ -216,13 +230,13 @@
                     <li class="page-item">
                         {% if 'centro' in request.path %}
                             {% if 'buscar' in request.path %}
-                            <a class="page-link" href="{{ url_for('admin.turnos_centro_buscar', id=centro.id, page=turnos.next_num) }}">Siguiente</a>
+                            <a class="page-link" href="{{ url_for('admin.turnos_centro_buscar', id=centro.id, page=turnos.next_num, buscar=request.args.get('buscar'), fecha=request.args.get('fecha')) }}">Siguiente</a>
                             {% else %}
                             <a class="page-link" href="{{ url_for('admin.turnos_centro',  id=centro.id, page=turnos.next_num) }}">Siguiente</a>
                             {% endif %}
                         {% else %}
                             {% if 'buscar' in request.path %}
-                            <a class="page-link" href="{{ url_for('admin.turnos_buscar', page=turnos.next_num) }}">Siguiente</a>
+                            <a class="page-link" href="{{ url_for('admin.turnos_buscar', page=turnos.next_num, buscar=request.args.get('buscar'), fecha=request.args.get('fecha')) }}">Siguiente</a>
                             {% else %}
                             <a class="page-link" href="{{ url_for('admin.turnos', page=turnos.next_num) }}">Siguiente</a>
                             {% endif %}

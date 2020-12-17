@@ -59,6 +59,9 @@
             <b-row>
             <h5>Abierto: {{ centerData.opening_time }} - {{ centerData.close_time }} </h5>
             </b-row>
+            <b-row>
+            <h5 v-if="centerData.visit_protocol">Protocolo: <br><b-icon-file-earmark-medical></b-icon-file-earmark-medical> <b>{{centerData.visit_protocol.split(/[\\/]/).pop()}}</b> <br><b-button pill variant="danger" size="sm" :href="'https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/static/uploads/'+centerData.visit_protocol.split(/[\\/]/).pop()"  download> <b> Descargar </b></b-button> </h5>
+            </b-row>
             <br>
             <b-button :id="centerData.id" block pill variant="info" size="lg" :to="this.$route.path + '/' + centerData.id + '/solicitar_turno'"><b-icon-calendar-date></b-icon-calendar-date> Solicitar turno </b-button>
           </b-container>
@@ -97,7 +100,7 @@ export default {
     }
   },
   created () {
-    axios.get('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros')
+    axios.get('http://localhost:5000/administracion/centros')
       .then(response => {
       // JSON responses are automatically parsed.
         console.log(response.data)

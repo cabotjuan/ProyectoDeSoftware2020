@@ -10,7 +10,7 @@
           <b-form @submit.stop.prevent="post_center">
             <b-form-group
               id="input-group-1"
-              label="Nombre:"
+              label="(*)Nombre:"
               label-for="input-1"
             >
               <b-form-input
@@ -24,7 +24,7 @@
             </b-form-group>
             <b-form-group
               id="input-group-2"
-              label="Dirección:"
+              label="(*)Dirección:"
               label-for="input-2"
             >
               <b-form-input
@@ -37,7 +37,7 @@
             </b-form-group>
             <b-form-group
               id="input-group-3"
-              label="Teléfono:"
+              label="(*)Teléfono:"
               label-for="input-3"
             >
               <b-form-input
@@ -54,7 +54,7 @@
               <b-col>
                 <b-form-group
                   id="input-group-4"
-                  label="Apertura:"
+                  label="(*) Horario apertura:"
                   label-for="input-4"
                 >
                 <b-form-timepicker
@@ -73,7 +73,7 @@
               <b-col>
                 <b-form-group
                   id="input-group-5"
-                  label="Cierre:"
+                  label="(*) Horario cierre:"
                   label-for="input-5"
                 >
                 <b-form-timepicker
@@ -94,7 +94,7 @@
               <b-col cols=6>
                 <b-form-group
                   id="input-group-6"
-                  label="Municipios:"
+                  label="(*)Municipio:"
                   label-for="input-6"
                 >
                 <b-form-select
@@ -109,7 +109,7 @@
               <b-col>
                 <b-form-group
                   id="input-group-11"
-                  label="Tipo de centro:"
+                  label="(*)Tipo de centro:"
                   label-for="input-11"
                 >
                 <b-form-select
@@ -124,15 +124,17 @@
             </b-row>
             <b-form-group
               id="input-group-7"
-              label="Página web:"
+              label="Url Página web:"
               label-for="input-7"
             >
             <b-form-input
               id="input-7"
-              v-model="form.web"
-              placeholder="Página web"
+              v-model="$v.form.web.$model"
+              placeholder="http://..."
+              :state="validateState('web')"
             >
             </b-form-input>
+            <div class="error text-danger" v-if="submited && !$v.form.web.url">URL invalida.</div>
             </b-form-group>
             <b-form-group
               id="input-group-8"
@@ -149,8 +151,22 @@
             <div class="error text-danger" v-if="submited && !$v.form.email.email">Email invalido.</div>
             </b-form-group>
             <b-form-group
+              id="input-group-8"
+              label="Protocolo:"
+              label-for="input-protocol">
+             <b-form-file
+              id="input-protocol"
+              v-model="form.protocol"
+              :state="Boolean(form.protocol)"
+              ref="file"
+              placeholder="Elegi un archivo o arrastralo aqui..."
+              drop-placeholder="arrastra el archivo aqui..."
+            ></b-form-file>
+            <div class="mt-3">Selected file: {{ form.protocol ? form.protocol.name : '' }}</div>
+            </b-form-group>
+            <b-form-group
               id="input-group-10"
-              label="Ubicación:"
+              label="Ubicación en mapa:"
               label-for="input-10"
             >
             <div class="px-3" style="height: 500px">
@@ -170,11 +186,11 @@
             </b-form-group>
             <b-form-group
               id="input-group-verificar"
-              label="Verificacion:"
+              label="(*)Verificacion:"
               label-for="input-verificar"
             >
             <vue-recaptcha ref="recaptcha" @verify="onVerify" sitekey="6LezGQUaAAAAABBRwpY3FGileNcOiKk5RyM5-h4g"></vue-recaptcha>
-            <div id="robot-msg" class="error text-danger" v-if="submited && !robot">Campo obligatorio.</div>
+            <div id="robot-msg" class="error text-danger" v-if="!form.robot & submited">Campo obligatorio.</div>
             </b-form-group>
             <b-button class= "mt-3" type="submit" variant="primary">Enviar datos</b-button>
             <b-button class= "mt-3 ml-2" type="cancel" variant="secondary" to="/">Cancelar</b-button>
@@ -189,7 +205,7 @@ import { LMap, LTileLayer, LMarker, LTooltip } from 'vue2-leaflet'
 import swal from 'sweetalert'
 import VueRecaptcha from 'vue-recaptcha'
 import { validationMixin } from 'vuelidate'
-import { required, email, numeric } from 'vuelidate/lib/validators'
+import { required, email, numeric, url } from 'vuelidate/lib/validators'
 const axios = require('axios').default
 export default {
   name: 'MyAwesomeMap',
@@ -210,12 +226,13 @@ export default {
         opening_time: '',
         close_time: '',
         town: null,
-        web: '-',
-        email: '-',
+        web: '',
+        email: '',
         center_type_id: null,
         latitude: 0,
         longitude: 0,
-        robot: false
+        robot: false,
+        protocol: null
       },
       submited: false,
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -258,6 +275,9 @@ export default {
       phone: {
         required,
         numeric
+      },
+      web: {
+        url
       }
     },
     opening_time_sec: {
@@ -301,7 +321,22 @@ export default {
       if (this.$v.$invalid || !this.form.robot) {
         console.log('Error')
       } else {
-        axios.post('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros', this.form)
+        const formData = new FormData()
+        const file = this.$refs.file.files[0]
+        formData.append('visit_protocol', file)
+        formData.append('name_center', this.form.name_center)
+        formData.append('address', this.form.address)
+        formData.append('phone', this.form.phone)
+        formData.append('opening_time', this.form.opening_time)
+        formData.append('close_time', this.form.close_time)
+        formData.append('town', this.form.town)
+        formData.append('web', this.form.web)
+        formData.append('email', this.form.email)
+        formData.append('center_type_id', this.form.center_type_id)
+        formData.append('latitude', this.form.latitude)
+        formData.append('longitude', this.form.longitude)
+
+        axios.post('http://localhost:5000/administracion/centros', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
           .then(response => {
             swal('¡Listo!', 'El centro se cargó correctamente', 'success')
               .then(() => {
@@ -328,7 +363,6 @@ export default {
       if (response) this.form.robot = true
     },
     validateState (n) {
-      console.log(n)
       const { $dirty, $error } = this.$v.form[n]
       return $dirty ? !$error : null
     },
@@ -372,5 +406,8 @@ export default {
   }
   .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
     opacity: 0
+  }
+  #map{
+    cursor: crosshair;
   }
 </style>

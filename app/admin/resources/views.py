@@ -1,5 +1,5 @@
 from app.admin.resources.forms import LoginForm, RegistrationForm, ConfigForm, EditForm, HelpCenterForm, AppointmentForm, AppointmentWithCenterForm
-from flask import flash, redirect, session, render_template, url_for, Blueprint, request, jsonify, make_response, current_app, abort
+from flask import send_from_directory, flash, redirect, session, render_template, url_for, Blueprint, request, jsonify, make_response, current_app, abort
 from app.models.model import User, Role, Permission, users_roles, Config, HelpCenter, Status, CenterType, Appointment, HelpCenterSchema, CenterTypeSchema, StatusSchema, AppointmentSchema
 from app.extensions import db
 from flask_login import login_required, login_user, logout_user, current_user
@@ -14,6 +14,7 @@ import decimal
 import datetime
 import json
 import re
+import os
 from email_validator import validate_email, EmailNotValidError
 from app.admin.helpers.turnos import generar_turnos
 
@@ -344,6 +345,12 @@ def centros_ayuda(page=1):
 @login_required
 def centros_buscar_nombre(page=1):
     search = request.form.get('buscar-centro')
+    if search:
+        return redirect(url_for('admin.centros_buscar_nombre', buscar=search))
+    else:
+        search = request.args.get('buscar')
+        if not search:
+            search = ''
     items_per_page = Config.query.first().n_elements
     centros = HelpCenter.query.filter(HelpCenter.name_center.contains(
         search)).paginate(page, per_page=items_per_page)
@@ -364,8 +371,9 @@ def centros_filtrar_estado(page=1):
 @admin_bp.route('centro/<id>', methods=['GET', 'POST'])
 @login_required
 def ver_centro(id):
-    # IMPLEMENTAR
     centro = HelpCenter.query.filter_by(id=id).first()
+    if centro.visit_protocol:
+        centro.visit_protocol = os.path.basename(centro.visit_protocol) 
     return render_template('admin/centro.html', centro=centro)
 
 
@@ -577,6 +585,12 @@ def turnos(page=1):
 def turnos_buscar(page=1):
     search_name = request.form.get('buscar-nombre')
     search_date = request.form.get('buscar-fecha')
+    if search_name or search_date:
+            return redirect(url_for('admin.turnos_buscar', buscar=search_name, fecha=search_date))
+    else:
+        search_name = request.args.get('buscar')
+        search_date = request.args.get('fecha')
+
     id_usuario = current_user.get_id()
     usuarios_por_pag = Config.query.first().n_elements
     if User.tiene_permiso(id_usuario, 1):
@@ -803,7 +817,7 @@ def api_centros():
 
         # Obtener todos los Centros de Ayuda #
 
-        centers = HelpCenter.query.all()
+        centers = HelpCenter.query.filter_by(status_id=1).all()
 
         # Serializar a JSON los Centros de Ayuda #
 
@@ -820,24 +834,29 @@ def api_centros():
         # Recibir un Centro de Ayuda en JSON #
 
         try:
-
-            # Si el request es un JSON, obtenerlo para validar los datos #
-
-            data = request.get_json()
+            data = request.form.to_dict()
+            protocol_file = None
+            if request.files:
+                protocol_file = request.files['visit_protocol']
+            if protocol_file:
+                filename_vp = secure_filename(protocol_file.filename)
+                protocol_path = path.join(
+                    current_app.root_path, 'static/uploads', filename_vp)
+                protocol_file.save(protocol_path)
+                data['visit_protocol'] = protocol_path
+            else:
+                data['visit_protocol'] = ''            
 
             # Instancia HelpCenter validando que esten todas las claves correspondientes en el JSON #
             if not data["latitude"]:
                 data["latitude"] = 0
             if not data["longitude"]:
                 data["longitude"] = 0
-            if not data["web"]:
-                data["web"] = '-'
-            if not data["email"]:
-                data["email"] = '-'
-
-            # validar Email
-            validate_email(data["email"])
-
+                        
+            if data["email"]:
+                # validar Email
+                validate_email(data["email"])    
+            
             # validar Horarios
             if not bool(re.compile(r'^(([01]\d|2[0-3]):([0-5]\d)|24:00)$').match(data["opening_time"])):
                 raise Exception("Horario de apertura invalido")
@@ -1051,3 +1070,9 @@ def api_centro_reserva(centro_id):
             jsonify({"mensaje": str(err)}), 400)
 
     return res
+
+
+@admin_bp.route('/uploads/<filename>')
+def download_file(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'],
+                               filename, as_attachment=True)

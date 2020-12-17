@@ -81,9 +81,11 @@
                                     </i>{% endif %}</td>
                             </tr>
                             <tr>
-                                <td><b>Protocolo de Visita: </b> {{centro.visit_protocol}}
-                                    {% if not centro.visit_protocol %} <i> No Disponible </i>{% endif %} </td>
+                                {% if centro.visit_protocol %}
+                                <td><b>Protocolo de Visita: </b> {{ centro.visit_protocol }} <a class="btn btn-light btn-sm" href="{{ url_for('admin.download_file',filename=centro.visit_protocol ) }}">Descargar <i class="fas fa-download"></i></a></td>
+                                {% endif %}
                             </tr>
+                            {% if centro.latitude != '0' and centro.longitude != '0' %}
                             <tr>
                                 <td><b>
                                         Ubicacion:
@@ -94,7 +96,7 @@
                                     </div>
                                 </td>
                             </tr>
-
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>

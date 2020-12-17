@@ -100,7 +100,7 @@ export default {
     }
   },
   created () {
-    axios.get('http://localhost:5000/administracion/centros')
+    axios.get('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros')
       .then(response => {
       // JSON responses are automatically parsed.
         console.log(response.data)

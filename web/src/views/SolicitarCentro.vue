@@ -336,7 +336,7 @@ export default {
         formData.append('latitude', this.form.latitude)
         formData.append('longitude', this.form.longitude)
 
-        axios.post('http://localhost:5000/administracion/centros', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        axios.post('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
           .then(response => {
             swal('¡Listo!', 'El centro se cargó correctamente', 'success')
               .then(() => {

@@ -1077,6 +1077,29 @@ def download_file(filename):
     return send_from_directory(current_app.config['UPLOAD_FOLDER'],
                                filename, as_attachment=True)
 
+@ admin_bp.route('/centros/tipos_de_centros', methods=["GET"])
+def api_tipos_de_centros():
+    """
+        API endpoint: /centros/tipos_de_centros
+
+        Method GET:
+            Este servicio permite obtener la cantidad de tipos de centro en base al total.
+
+    """
+    centers_by_center_type = HelpCenter.query.with_entities(HelpCenter.center_type_id, func.count(
+        HelpCenter.center_type_id)).group_by(HelpCenter.center_type_id).all()
+    center_types_names = dict(CenterType.query.with_entities(CenterType.id, CenterType.name_center_type).all())
+
+    results = []
+
+    for entry in centers_by_center_type:
+        result = {}
+        result['center_type'] = center_types_names[entry[0]]
+        result['centers_count'] = entry[1]
+        results.append(result)
+
+    return make_response(jsonify(results), 201, {'Content-Type': 'application/json; charset=utf-8'})
+
 
 @ admin_bp.route('/centros/historial', methods=["GET"])
 @ cross_origin()

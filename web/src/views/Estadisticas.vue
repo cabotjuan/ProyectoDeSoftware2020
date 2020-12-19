@@ -4,8 +4,8 @@
     <b-container fluid class="section-servicio2">
           <b-row class="justify-content-center">
           <b-col md="6" class="justify-items-center">
-            <h2 class="text-center m-4">Rótulo Gráfico 1</h2>
-            <ve-pie :data="chartData" :settings="chartSettings" :id="Grafico1"></ve-pie>
+            <h2 class="text-center m-4">Centros por municipio</h2>
+            <ve-pie :data="chartData1" :settings="chartSettings1" :id="Grafico1"></ve-pie>
             <hr>
           </b-col>
           <b-col md="6" class="justify-items-center">
@@ -29,14 +29,24 @@
 </template>
 <script>
 import VePie from 'v-charts/lib/pie.common'
+const axios = require('axios').default
 export default {
   components: { VePie },
   data () {
+    this.chartSettings1 = {
+      dimension: 'town',
+      metrics: 'countCenter'
+    }
+
     this.chartSettings = {
       dimension: 'cost',
       metrics: 'profit'
     }
     return {
+      chartData1: {
+        columns: ['town', 'countCenter'],
+        rows: []
+      },
       chartData: {
         columns: ['date', 'cost', 'profit'],
         rows: [
@@ -49,6 +59,21 @@ export default {
         ]
       }
     }
+  },
+  mounted () {
+    axios.get('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros')
+      .then(response => {
+        console.log('-------------------------LALALALA------------------------------------')
+        console.log(response.data)
+        response.data.forEach(
+          center => {
+            console.log('LALALALA', this.chartData1.rows)
+            this.chartData1.rows.push({ town: center.town, countCenter: 5 })
+          })
+      })
+      .catch(e => {
+        console.log(e)
+      })
   }
 }
 

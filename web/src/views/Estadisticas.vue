@@ -13,7 +13,7 @@
           </b-col>
           <b-col md="6" class="justify-items-center">
             <h2 class="text-center m-4">Tipos de Centros</h2>
-            <ve-pie :data="chartDataCenterType" :settings="chartSettingsCenterType"></ve-pie>
+            <ve-histogram :data="chartDataCenterType"></ve-histogram>
           </b-col>
           </b-row>
     </b-container>
@@ -21,9 +21,10 @@
 </template>
 <script>
 import VePie from 'v-charts/lib/pie.common'
+import VeHistogram from 'v-charts/lib/histogram.common'
 const axios = require('axios').default
 export default {
-  components: { VePie },
+  components: { VePie, VeHistogram },
   data () {
     this.chartSettingsTurnos = {
       dimension: 'center',
@@ -41,7 +42,7 @@ export default {
 
     this.chartSettingsCenterType = {
       dimension: 'centerType',
-      metrics: 'countCenterType'
+      metrics: 'Tipos de Centros'
     }
     return {
       chartDataTurnos: {
@@ -53,7 +54,7 @@ export default {
         rows: []
       },
       chartDataCenterType: {
-        columns: ['centerType', 'countCenterType'],
+        columns: ['centerType', 'Tipos de Centros'],
         rows: []
       }
     }
@@ -86,7 +87,7 @@ export default {
       .then(response => {
         response.data.forEach(
           res => {
-            this.chartDataCenterType.rows.push({ centerType: res.center_type, countCenterType: res.centers_count })
+            this.chartDataCenterType.rows.push({ centerType: res.center_type, 'Tipos de Centros': res.centers_count })
           }
         )
       })

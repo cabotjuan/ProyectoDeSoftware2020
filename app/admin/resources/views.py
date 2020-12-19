@@ -1100,7 +1100,6 @@ def api_tipos_de_centros():
 
     return make_response(jsonify(results), 201, {'Content-Type': 'application/json; charset=utf-8'})
 
-
 @ admin_bp.route('/centros/historial', methods=["GET"])
 @ cross_origin()
 def api_historial_turnos():

@@ -115,13 +115,11 @@ export default {
 /* FOOTER STYLES */
 
 .footer-content {
-  height: 75vh;
-  max-height: 450px;
   margin-top: -5px;
   background-color: #2f9bae;
 }
 .footer-container{
-      display: flex;
+    display: flex;
     flex-direction: column;
     height: 100%;
 }

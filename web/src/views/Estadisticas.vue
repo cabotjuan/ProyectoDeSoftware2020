@@ -5,7 +5,7 @@
           <b-row class="justify-content-center">
           <b-col md="6" class="justify-items-center">
             <h2 class="text-center m-4">Centros por municipio</h2>
-            <ve-pie :data="chartData1" :settings="chartSettings1" :id="Grafico1"></ve-pie>
+            <ve-pie :data="chartData1" :settings="chartSettings1"></ve-pie>
             <hr>
           </b-col>
           <b-col md="6" class="justify-items-center">
@@ -17,11 +17,11 @@
           <b-row>
           <b-col md="6" class="justify-items-center">
             <h2 class="text-center m-4">Rótulo Gráfico 3</h2>
-            <ve-pie :data="chartData" :settings="chartSettings" :id="Grafico1"></ve-pie>
+            <ve-pie :data="chartData" :settings="chartSettings"></ve-pie>
           </b-col>
           <b-col md="6" class="justify-items-center">
-            <h2 class="text-center m-4">Rótulo Gráfico 4</h2>
-            <ve-pie :data="chartData" :settings="chartSettings" :id="Grafico1"></ve-pie>
+            <h2 class="text-center m-4">Tipos de Centros</h2>
+            <ve-pie :data="chartDataCenterType" :settings="chartSettingsCenterType"></ve-pie>
           </b-col>
           </b-row>
     </b-container>
@@ -46,6 +46,11 @@ export default {
       dimension: 'cost',
       metrics: 'profit'
     }
+
+    this.chartSettingsCenterType = {
+      dimension: 'centerType',
+      metrics: 'countCenterType'
+    }
     return {
       chartDataTurnos: {
         columns: ['center', 'count'],
@@ -65,6 +70,10 @@ export default {
           { date: '01/05', cost: 3123, profit: 15 },
           { date: '01/06', cost: 7123, profit: 20 }
         ]
+      },
+      chartDataCenterType: {
+        columns: ['centerType', 'countCenterType'],
+        rows: []
       }
     }
   },
@@ -89,6 +98,14 @@ export default {
         response.data.forEach(
           row => {
             this.chartDataTurnos.rows.push({ center: row.center, count: row.appointments_count })
+          }
+        )
+      })
+    axios.get('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros/tipos_de_centros')
+      .then(response => {
+        response.data.forEach(
+          res => {
+            this.chartDataCenterType.rows.push({ centerType: res.center_type, countCenterType: res.centers_count })
           }
         )
       })

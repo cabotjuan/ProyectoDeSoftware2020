@@ -9,8 +9,8 @@
             <hr>
           </b-col>
           <b-col md="6" class="justify-items-center">
-            <h2 class="text-center m-4">Rótulo Gráfico 2</h2>
-            <ve-pie :data="chartData" :settings="chartSettings" :id="Grafico1"></ve-pie>
+            <h2 class="text-center m-4">Turnos por Centro</h2>
+            <ve-pie :data="chartDataTurnos" :settings="chartSettingsTurnos"></ve-pie>
             <hr>
           </b-col>
           </b-row>
@@ -33,6 +33,10 @@ const axios = require('axios').default
 export default {
   components: { VePie },
   data () {
+    this.chartSettingsTurnos = {
+      dimension: 'center',
+      metrics: 'count'
+    }
     this.chartSettings1 = {
       dimension: 'town',
       metrics: 'countCenter'
@@ -43,6 +47,10 @@ export default {
       metrics: 'profit'
     }
     return {
+      chartDataTurnos: {
+        columns: ['center', 'count'],
+        rows: []
+      },
       chartData1: {
         columns: ['town', 'countCenter'],
         rows: []
@@ -75,6 +83,14 @@ export default {
       })
       .catch(e => {
         console.log(e)
+      })
+    axios.get('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros/historial')
+      .then(response => {
+        response.data.forEach(
+          row => {
+            this.chartDataTurnos.rows.push({ center: row.center, count: row.appointments_count })
+          }
+        )
       })
   }
 }

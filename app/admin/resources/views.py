@@ -3,7 +3,7 @@ from flask import send_from_directory, flash, redirect, session, render_template
 from app.models.model import User, Role, Permission, users_roles, Config, HelpCenter, Status, CenterType, Appointment, HelpCenterSchema, CenterTypeSchema, StatusSchema, AppointmentSchema
 from app.extensions import db
 from flask_login import login_required, login_user, logout_user, current_user
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 from os import path
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import CombinedMultiDict
@@ -1076,3 +1076,36 @@ def api_centro_reserva(centro_id):
 def download_file(filename):
     return send_from_directory(current_app.config['UPLOAD_FOLDER'],
                                filename, as_attachment=True)
+
+
+@ admin_bp.route('/centros/historial', methods=["GET"])
+@ cross_origin()
+def api_historial_turnos():
+    """
+         API endpoint: /centros/historial
+
+         Methods:
+            - GET:
+                Este servicio permite obtener un historial completo de turnos por cada Centro de Ayuda.
+
+    """
+    #   Lista de tuplas con la cantidad de turnos por centro. (ID, Cant) #
+    appointments_by_center = Appointment.query.with_entities(Appointment.center_id, func.count(
+        Appointment.center_id)).group_by(Appointment.center_id).all()
+    #   Diccionario Para obtener los nombres. ID: Nombre #
+    center_names = dict(HelpCenter.query.with_entities(HelpCenter.id, HelpCenter.name_center).all())
+    
+
+    # Reemplazar ID por nombre de centro #
+    
+    results = []
+
+    for entry in appointments_by_center:
+        result = {}
+        result['center'] = center_names[entry[0]]
+        result['appointments_count'] = entry[1]
+        results.append(result)
+
+    res = make_response(jsonify(results), 201, {
+            'Content-Type': 'application/json; charset=utf-8'})
+    return res

@@ -63,12 +63,14 @@ export default {
   mounted () {
     axios.get('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros')
       .then(response => {
-        console.log('-------------------------LALALALA------------------------------------')
-        console.log(response.data)
         response.data.forEach(
           center => {
-            console.log('LALALALA', this.chartData1.rows)
-            this.chartData1.rows.push({ town: center.town, countCenter: 5 })
+            const index = this.chartData1.rows.findIndex(row => row.town === center.town)
+            if (index !== -1) {
+              this.chartData1.rows[index].countCenter++
+            } else {
+              this.chartData1.rows.push({ town: center.town, countCenter: 1 })
+            }
           })
       })
       .catch(e => {

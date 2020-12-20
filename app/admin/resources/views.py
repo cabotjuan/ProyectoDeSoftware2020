@@ -1090,13 +1090,12 @@ def api_tipos_de_centros():
         HelpCenter.center_type_id)).group_by(HelpCenter.center_type_id).all()
     center_types_names = dict(CenterType.query.with_entities(CenterType.id, CenterType.name_center_type).all())
 
-    results = []
+    results = {}
 
     for entry in centers_by_center_type:
-        result = {}
-        result['center_type'] = center_types_names[entry[0]]
-        result['centers_count'] = entry[1]
-        results.append(result)
+        results[center_types_names[entry[0]]] = entry[1]
+    
+    results['Tipos de centros'] = 'Tipos de centros'
 
     return make_response(jsonify(results), 201, {'Content-Type': 'application/json; charset=utf-8'})
 

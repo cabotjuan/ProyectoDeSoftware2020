@@ -13,7 +13,7 @@
           </b-col>
           <b-col md="6" class="justify-items-center">
             <h2 class="text-center m-4">Tipos de Centros</h2>
-            <ve-histogram :data="chartDataCenterType"></ve-histogram>
+            <ve-histogram :data="chartDataCenterType" :settings="chartSettingsCenterType"></ve-histogram>
           </b-col>
           </b-row>
     </b-container>
@@ -41,8 +41,7 @@ export default {
     }
 
     this.chartSettingsCenterType = {
-      dimension: 'centerType',
-      metrics: 'Tipos de Centros'
+      yAxisName: ['Cantidad']
     }
     return {
       chartDataTurnos: {
@@ -54,7 +53,7 @@ export default {
         rows: []
       },
       chartDataCenterType: {
-        columns: ['centerType', 'Tipos de Centros'],
+        columns: ['Tipos de centros', 'Merendero', 'Sociedad de Fomento', 'Iglesia', 'Sala', 'Otros'],
         rows: []
       }
     }
@@ -83,13 +82,9 @@ export default {
           }
         )
       })
-    axios.get('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros/tipos_de_centros')
+    axios.get('http://localhost:5000/administracion/centros/tipos_de_centros')
       .then(response => {
-        response.data.forEach(
-          res => {
-            this.chartDataCenterType.rows.push({ centerType: res.center_type, 'Tipos de Centros': res.centers_count })
-          }
-        )
+        this.chartDataCenterType.rows.push(response.data)
       })
   }
 }

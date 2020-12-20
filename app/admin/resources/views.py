@@ -1087,7 +1087,8 @@ def api_tipos_de_centros():
             Este servicio permite obtener la cantidad de tipos de centro en base al total.
 
     """
-    centers_by_center_type = HelpCenter.query.with_entities(HelpCenter.center_type_id, func.count(
+    accepted_centers = HelpCenter.query.filter_by(status_id=1)
+    centers_by_center_type = accepted_centers.with_entities(HelpCenter.center_type_id, func.count(
         HelpCenter.center_type_id)).group_by(HelpCenter.center_type_id).all()
     center_types_names = dict(CenterType.query.with_entities(CenterType.id, CenterType.name_center_type).all())
 

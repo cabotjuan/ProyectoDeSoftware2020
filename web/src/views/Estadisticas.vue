@@ -13,7 +13,7 @@
           </b-col>
           <b-col md="6" class="justify-items-center">
             <h2 class="text-center m-4">Tipos de Centros</h2>
-            <ve-histogram :data="chartDataCenterType" :settings="chartSettingsCenterType"></ve-histogram>
+            <ve-histogram :data="chartDataCenterType"></ve-histogram>
           </b-col>
           </b-row>
     </b-container>
@@ -40,9 +40,6 @@ export default {
       metrics: 'profit'
     }
 
-    this.chartSettingsCenterType = {
-      yAxisName: ['Cantidad']
-    }
     return {
       chartDataTurnos: {
         columns: ['center', 'count'],

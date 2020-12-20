@@ -82,7 +82,7 @@ export default {
           }
         )
       })
-    axios.get('http://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros/tipos_de_centros')
+    axios.get('https://admin-grupo5.proyecto2020.linti.unlp.edu.ar/administracion/centros/tipos_de_centros')
       .then(response => {
         this.chartDataCenterType.rows.push(response.data)
       })

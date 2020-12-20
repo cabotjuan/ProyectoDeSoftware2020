@@ -1078,6 +1078,7 @@ def download_file(filename):
                                filename, as_attachment=True)
 
 @ admin_bp.route('/centros/tipos_de_centros', methods=["GET"])
+@ cross_origin()
 def api_tipos_de_centros():
     """
         API endpoint: /centros/tipos_de_centros
